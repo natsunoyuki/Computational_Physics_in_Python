@@ -1,5 +1,3 @@
-# file name: mandelbrot.py
-
 from scipy import *
 import matplotlib.pyplot as plt
 import time
@@ -35,38 +33,3 @@ plt.pcolormesh(linspace(x0,x1,N),linspace(y0,y1,N),Q)
 plt.axis('equal')
 plt.axes()
 plt.show()
-
-#legacy code:
-"""
-N=1000 #trials
-
-start = time.time()
-# set axes:
-x0 = -2
-x1 = 2
-y0 = -2
-y1 = 2
-# number of points per axis:
-# num=400
-num = N
-# create 2D space:
-X = linspace(x0,x1,num)
-Y = linspace(y0,y1,num)*1j
-[x,y] = meshgrid(X,Y)
-# print(shape(x))
-# print(shape(y))
-c = x+y
-z = zeros([num,num])
-
-for j in range(num):
-    z = z**2+c
-    
-end = time.time()-start
-print("Total run time: ")
-print(end)
-
-plt.plot(real(logical_not(isnan(z))*c),imag(logical_not(isnan(z))*c),'k.',markersize=1)
-# plt.imshow(abs(z))
-plt.axis('equal')
-plt.show()
-"""
