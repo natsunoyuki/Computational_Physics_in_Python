@@ -7,6 +7,7 @@ import time
 #the fractal is the Barnsley fern.
 
 def fern(N):
+    #N is the total number of points to use. More points mean more minute detail but longer run times.
     start = time.time()
     x = zeros([N + 1, 2])
     x[0, :] = array([0.5, 0.5])
