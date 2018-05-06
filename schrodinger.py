@@ -314,7 +314,7 @@ def stadium_wavefunctions_plot(R, L, E0):
     
 ##########################################################################################################
 
-# Additional code for Eclipse IDE users to run the functions:
+#Example function calls:
 
 #H=schrodinger1D(-10,10,500,Vfun,10,0.0,False)
 #print H
@@ -360,7 +360,7 @@ infinity, a Dirac Delta Function will be the result. This is an example of the c
 comments:this code takes a very long time to run!
 """
 
-stadium_wavefunctions_plot(1.0,2.0,1000.0)
+#stadium_wavefunctions_plot(1.0,2.0,1000.0)
 """
 comments: note this code takes forever to run if using scipy 0.9. Tested this code with a computer using scipy 0.10 and
 it works. Using the sigma=E0 argument makes the code run faster. Tried it with various values of L
