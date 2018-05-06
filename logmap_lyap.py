@@ -1,6 +1,3 @@
-#This is a placeholder file to hold useful bits of code which are used often    
-#for a short period of time. Do not store important stuff here!!!!!!!!!!!!!!
-#for reference this line is exactly 80 characters long#########################
 from __future__ import division  # float division
 from scipy import *  # generic math libraries import
 import matplotlib.pyplot as plt  # plotting libraries
