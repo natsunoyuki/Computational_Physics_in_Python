@@ -22,8 +22,9 @@ Q=zeros([N,N])
 for j in range(num):
     index=abs(z)<inf
     Q[index]=Q[index]+1
+    #depending on the following conditions various fractal sets are produced.
     #z=z**2+-0.835-0.2321*i
-    z=z**2+c
+    z=z**2+c #this one produces the classical mandelbrot set.
     #z=z**3*exp(z)+0.33
     #z=z**2*exp(z)+0.33
     
