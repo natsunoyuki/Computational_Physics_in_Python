@@ -11,6 +11,9 @@ from scipy import linalg
 #Holger Kantz, 'A robust method to estimate the maximal Lyapunov exponent of a time series'
 #Physics Letters A, Volume 185, Issue 1, Pages 77-87, 1994.
 
+#In this code we generate the logistic map in order to create a nonlinear system for the demonstration
+#of the algorithim.
+
 def ReconSp(tauI,dm,data):
     #this function reconstructs the attractor of a time series through time delay embedding
     Nmax=len(data)-(dm-1)*tauI
@@ -130,5 +133,4 @@ plt.plot(x,y,'-o')
 plt.xlabel('Tau')
 plt.ylabel('S')
 plt.grid('on')
-plt.title('Lyapunov Exponent for Logistic System')
 plt.show()
