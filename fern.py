@@ -1,9 +1,10 @@
-# file name: fern.py
-
 from scipy import *
 import matplotlib.pyplot as plt
 from scipy import random
 import time
+
+#This code demonstrates the recursive method used to create a fractal. In this case
+#the fractal is the Barnsley fern.
 
 def fern(N):
     start = time.time()
@@ -25,11 +26,12 @@ def fern(N):
             x[k + 1, 1] = 0.26 * x[k, 0] + 0.24 * x[k, 1] + 0.44
 
     end = time.time() - start
-    print('The total time elapsed is: ')
+    print 'The total time elapsed is: '
     print(end)
-    
-    plt.plot(x[:, 0], x[:, 1], 'g.', markersize=0.2)
-    plt.axis('equal')
-    plt.show()
+    return x
 
-fern(1000000)
+#example function call and plotting:
+x=fern(10000)
+plt.plot(x[:,0], x[:,1], 'g.')
+plt.axis('equal')
+plt.show()
