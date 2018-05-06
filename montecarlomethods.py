@@ -192,5 +192,5 @@ def ising_heatbath_2D(J, H, T, Nx, Ny, steps, warmup_steps):
 
 #################################################################################################
 #FUNCTION CALLS TO TEST THE FUNCTION:
-[T,M]=ising_metropolis_2D(1.0,0.0,linspace(0.01,10,100),20,20,100000,100000)
+#[T,M]=ising_metropolis_2D(1.0,0.0,linspace(0.01,10,100),20,20,100000,100000)
 #[T,M]=ising_heatbath_2D(1.0,0.0,linspace(0.01,10,100),20,20,100000,100000)
