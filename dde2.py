@@ -12,6 +12,7 @@ import time
 
 starttime=time.time() #log start time
 
+#functions to hold the delay difference equation:
 def less_than_one(x,t,delayx):
     ydot=zeros(len(x))
     ydot[0]=Qin-x[1] #pressure
@@ -39,7 +40,7 @@ Qin=0.8
 mu=10
 y0=array([1.5,1.5]) #initial values 1.1,1.1 [P,Q]
 tstar=1 #interesting values to use: 1,0.2
-dt=tstar/20000 #set time step 
+dt=tstar/20000 #set time step size
 delayindex=int32(tstar/dt) #for array calling
 t=arange(-tstar,30+dt,dt) #length of time of the simulation
 Y=zeros([len(t),len(y0)])
@@ -51,6 +52,7 @@ for i in range(delayindex):
     Y[i+1,:]=y0
 #Y[0:delayindex+1]=y0
 xx=zeros(len(t)-1-delayindex)
+
 #Actual RK4 loop to solve the delay differential equation:
 for i in range(len(t)-1-delayindex):
     params=Y[i,1]
