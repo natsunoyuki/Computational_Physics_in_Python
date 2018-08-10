@@ -4,7 +4,6 @@ from scipy import *
 import matplotlib.pyplot as plt
 from scipy import linalg
 from scipy import signal
-import time
 
 #This script loads a seismometer response file with the following format:
 """
