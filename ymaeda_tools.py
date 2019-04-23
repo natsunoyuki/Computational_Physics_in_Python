@@ -7,8 +7,20 @@ import struct #for dealing with binary data
 import time
 
 #python version of functions in ymaeda_tools.
+#The original functions were written by Dr. Y. Maeda 
+#of Nagoya University in the C programming language.
+#I have basically translated a number of the functions into python
+#in order to carry out Moment Tensor Inversion analysis on 
+#seismic waveforms, as I basically did not understand how to
+#write and modify C code.
 
 #test directory:
+#main_dir is the directory containing the inversion solutions
+#snapshot_dir is the directory containing the calculated seismic Green's functions.
+#data_obs_dir is the directory containing the observed seismic waveforms
+#data_obs_spectrum_dir is the directory containing the spectrum of the observed seismic waveforms
+#stfun_dir is the directory containing the source time function used in calculating the seismic Green's functions.
+
 main_dir='/home/yumi/kirishima_invert/inversion_results_dump_new/inversion_result_residuals117/t60_p100/x-10900y-121100z1000/'
 #snapshot_dir="/media/yumi/INVERSION/SMN_EW_SMALL/PML/snapshot"
 snapshot_dir="/media/yumi/INVERSION/GFDIR1/SMN_EW_SMALL/PML/snapshot"
