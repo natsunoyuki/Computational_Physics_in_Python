@@ -6,16 +6,16 @@ random.seed() #seed the RNG.
 import multiprocessing as mp
 
 class Worker:
-    def __init__(self,J,H,Nx,Ny,steps,warmup_steps,results):
-        self.J = J
-        self.H = H
-        self.Nx = Nx
-        self.Ny = Ny
-        self.steps = steps
-        self.warmup_steps = warmup_steps     
-        self.N = Nx*Ny
-        self.k = 1
-        self.results=results
+    def __init__(self,D,J,H,Nx,steps,warmup_steps,results):
+        self.D = D #dimensions
+        self.J = J #coupling 
+        self.H = H #external magnetic field
+        self.Nx = Nx #number of spins per dimension
+        self.steps = steps #MC steps
+        self.warmup_steps = warmup_steps #warmup steps     
+        self.N = Nx ** D #total number of spins in cubic crystal
+        self.k = 1 #Boltzmann constant
+        self.results=results #results queue
         
     def __call__(self,q):
         while True:
@@ -26,37 +26,64 @@ class Worker:
             print("Processing temperature: {}".format(t))
             m = 0
             spin = np.ones(self.N)
-            B = 1/(self.k*t)
-            pflip = np.zeros([2,5])
+            B = 1.0 / (self.k * t)
+            
+            pflip = self.calc_pflip(B) 
+                
+            for n in range(self.warmup_steps):
+                spin = self.isingmodel(spin, pflip)
+            for n in range(self.steps):
+                spin = self.isingmodel(spin, pflip)
+                m = m + np.sum(spin) / self.N
+            m = np.abs(m / self.steps)
+            
+            self.results.put([t, m])
+            
+            q.task_done()
+            
+    def calc_pflip(self,B):
+        if self.D == 2:
+            pflip = np.zeros([2, 5])
             Si = 1
             Sj = -4
             for i in range(2):  
                 for j in range(5):  
-                    pflip[i,j] = np.exp(2*(self.H+self.J*Sj)*Si*-B)  
-                    Sj = Sj+2  
+                    pflip[i, j] = np.exp(2 * (self.H + self.J * Sj) * Si * -B)  
+                    Sj = Sj + 2  
                 Si = -1  
-                Sj = -4              
-            for n in range(self.warmup_steps):
-                spin=self.ising2D(self.Nx,self.Ny,spin,pflip)
-            for n in range(self.steps):
-                spin=self.ising2D(self.Nx,self.Ny,spin,pflip)
-                m = m + np.sum(spin)/self.N
-            m = np.abs(m/self.steps)
-            self.results.put([t,m])
-            
-            q.task_done()
-            
-    def ising2D(self,Nx,Ny,spin,pflip):
-        N=Nx*Ny
-        r = int(random.random()*N)
-        x = np.mod(r,Nx)
-        y = r//Nx
+                Sj = -4  
+        elif self.D == 3:
+            pflip = np.zeros([2, 7])
+            Si = 1
+            Sj = -6
+            for i in range(2):
+                for j in range(7):
+                    pflip[i, j] = np.exp(2 * (self.H + self.J * Sj) * Si * -B)
+                    Sj = Sj + 2  
+                Si = -1  # "reset" Si
+                Sj = -6  # reset Sj
+        return pflip
+    
+    def isingmodel(self,spin,pflip):
+        if self.D == 2:
+            spin = self.ising2D(spin, pflip)
+        elif self.D == 3:
+            spin = self.ising3D(spin, pflip)
+        return spin
+    
+    def ising2D(self, spin, pflip):
+        N = self.Nx ** self.D
+        Nx = self.Nx
+        Ny = self.Nx
+        r = int(random.random() * N)
+        x = np.mod(r, Nx)
+        y = r // Nx
         s0 = spin[r]
-        s1 = spin[np.mod(x+1,Nx)+y*Ny]
-        s2 = spin[x+np.mod(y+1,Ny)*Nx]
-        s3 = spin[np.mod(x-1+Nx,Nx)+y*Nx]
-        s4 = spin[x+np.mod(y-1+Ny,Ny)*Nx]
-        neighbours = s1+s2+s3+s4
+        s1 = spin[np.mod(x + 1, Nx) + y * Ny]
+        s2 = spin[x + np.mod(y + 1, Ny) * Nx]
+        s3 = spin[np.mod(x - 1 + Nx, Nx) + y * Nx]
+        s4 = spin[x + np.mod(y - 1 + Ny, Ny) * Nx]
+        neighbours = s1 + s2 + s3 + s4
         if s0 == 1:
             pfliprow = 0
         elif s0 == -1:
@@ -72,11 +99,52 @@ class Worker:
         elif neighbours == 4:
             pflipcol = 4
         rand = random.random()
-        if rand < pflip[pfliprow,pflipcol]:
+        if rand < pflip[pfliprow, pflipcol]:
             spin[r] = -spin[r] 
         return spin
+    
+    def ising3D(self, spin, pflip):
+        N = self.N
+        Nx = self.Nx
+        Ny = self.Nx
+        Nz = self.Nx
+        r = int(random.random() * N)
+        x = np.mod(r, Nx)
+        y = np.mod(r // Nx, Ny)
+        z = r // Nx // Ny
+        s0 = spin[r]
+        s1 = spin[np.mod(x + 1, Nx) + y * Ny + z * Ny * Nz]
+        s2 = spin[x + np.mod(y + 1, Ny) * Nx + z * Ny * Nz]
+        s3 = spin[np.mod(x - 1 + Nx, Nx) + y * Nx + z * Ny * Nz]
+        s4 = spin[x + np.mod(y - 1 + Ny, Ny) * Nx + z * Ny * Nz]
+        s5 = spin[x + y * Ny + np.mod(z - 1, Nz) * Ny * Nz]
+        s6 = spin[x + y * Ny + np.mod(z + 1, Nz) * Ny * Nz]
+        neighbours = s1 + s2 + s3 + s4 + s5 + s6
+        if s0 == 1:
+            pfliprow = 0
+        elif s0 == -1:
+            pfliprow = 1
+        if neighbours == -6:
+            pflipcol = 0
+        elif neighbours == -4:
+            pflipcol = 1
+        elif neighbours == -2:
+            pflipcol = 2
+        elif neighbours == 0:
+            pflipcol = 3 
+        elif neighbours == 2:
+            pflipcol = 4
+        elif neighbours == 4:
+            pflipcol = 5
+        elif neighbours == 6:
+            pflipcol = 6
+        rand = random.random()
+        if rand < pflip[pfliprow, pflipcol]:
+            spin[r] = -spin[r] 
+        return spin 
+        
    
-def main(J=1,H=0,T=np.linspace(0.01,5,50),N=20,steps=100000,nprocs=2):
+def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
     starttime = time.time()
     
     q = mp.JoinableQueue()
@@ -86,7 +154,7 @@ def main(J=1,H=0,T=np.linspace(0.01,5,50),N=20,steps=100000,nprocs=2):
     results = mp.Queue()
     processes = []
     for i in range(nprocs):
-        worker=mp.Process(target=Worker(J,H,N,N,steps,steps,results),args=(q,),daemon=True)
+        worker=mp.Process(target=Worker(D,J,H,Nx,steps,steps,results),args=(q,),daemon=True)
         worker.start()
         processes.append(worker)
     q.join()
@@ -106,8 +174,8 @@ def main(J=1,H=0,T=np.linspace(0.01,5,50),N=20,steps=100000,nprocs=2):
     
     return T2,M2
     
-T,M = main(J=1,H=0,T=np.linspace(0.01,5,50),N=20,steps=100000,nprocs=2)
-plt.plot(T,M)
-plt.xlabel("Temperature")
-plt.ylabel("Magnetism")
-plt.show()
+#T,M = main(D=3,J=1,H=0,T=np.linspace(0.01,10,100),Nx=20,steps=100000,nprocs=2)
+#plt.plot(T,M)
+#plt.xlabel("Temperature")
+#plt.ylabel("Magnetism")
+#plt.show()
