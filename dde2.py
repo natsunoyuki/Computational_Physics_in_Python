@@ -1,5 +1,4 @@
-from __future__ import division
-from scipy import *
+import numpy as np
 import matplotlib.pyplot as plt
 import time
 
@@ -14,13 +13,13 @@ starttime=time.time() #log start time
 
 #functions to hold the delay difference equation:
 def less_than_one(x,t,delayx):
-    ydot=zeros(len(x))
+    ydot=np.zeros(len(x))
     ydot[0]=Qin-x[1] #pressure
     ydot[1]=x[1]/x[0]*(Qin-x[1]+(mu-1)*(x[1]-delayx)*x[1]) #flux
     return ydot
     
 def more_than_one(x,t,delayx):
-    ydot=zeros(len(x))
+    ydot=np.zeros(len(x))
     ydot[0]=Qin-x[1] #pressure
     ydot[1]=Qin-x[1] #flux
     return ydot
@@ -36,14 +35,15 @@ def rk4(t0,t1,y0,ydot_fun,params):
     return y1
 
 #dde parameters:
+
 Qin=0.8
 mu=10
-y0=array([1.5,1.5]) #initial values 1.1,1.1 [P,Q]
+y0=np.array([1.5,1.5]) #initial values 1.1,1.1 [P,Q]
 tstar=1 #interesting values to use: 1,0.2
 dt=tstar/20000 #set time step size
-delayindex=int32(tstar/dt) #for array calling
-t=arange(-tstar,30+dt,dt) #length of time of the simulation
-Y=zeros([len(t),len(y0)])
+delayindex=np.int(tstar/dt) #for array calling
+t=np.arange(-tstar,30+dt,dt) #length of time of the simulation
+Y=np.zeros([len(t),len(y0)])
 Y[0,:]=y0 #set initial conditions for the simulation
 #Create data history:
 for i in range(delayindex):
@@ -51,14 +51,14 @@ for i in range(delayindex):
     y0[1]=y0[1]-1./delayindex #Q history
     Y[i+1,:]=y0
 #Y[0:delayindex+1]=y0
-xx=zeros(len(t)-1-delayindex)
+xx=np.zeros(len(t)-1-delayindex)
 
 #Actual RK4 loop to solve the delay differential equation:
 for i in range(len(t)-1-delayindex):
     params=Y[i,1]
     T=t[i:i+delayindex+1]
     Q=Y[i:i+delayindex+1,1]
-    xx[i]=trapz(Q,T) #check the value of the integral of Q w.r.t. T
+    xx[i]=np.trapz(Q,T) #check the value of the integral of Q w.r.t. T
     if xx[i]>1:
         Y[i+1+delayindex,:]=rk4(t[i+delayindex],t[i+1+delayindex],Y[i+delayindex,:],more_than_one,params)
     else:
@@ -66,9 +66,9 @@ for i in range(len(t)-1-delayindex):
     
 X=Y[delayindex:] #remove the (artificial) history from the data arrays
 T=t[delayindex:]
-plt.plot(X[:,1],X[:,0]) #plot the simulated data
 
 endtime=time.time()-starttime
-print "Time elapsed:", endtime #print time elapsed
+print("Time elapsed: {:.2f}s".format(endtime)) #print time elapsed
 
+plt.plot(X[:,1],X[:,0]) #plot the simulated data
 plt.show() #show the plots on screen
