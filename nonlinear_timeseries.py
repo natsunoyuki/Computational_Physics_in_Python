@@ -6,14 +6,7 @@ from scipy import linalg
 
 pi = np.pi
 
-# This code shows how to calculate the Lyapunov exponent for a nonlinear system using the equations
-# proposed by:
-
-# H. Kantz, 'A robust method to estimate the maximal Lyapunov exponent of a time series'
-# Physics Letters A, Volume 185, Issue 1, Pages 77-87, 1994.
-
-# In this code we generate the logistic map in order to create a nonlinear system for the demonstration
-# of the algorithim.
+# This script contains several functions which are useful for nonlinear time series analysis.
 
 def ReconSp(tauI, dm, data):
     # This function reconstructs the attractor of a time series through time delay embedding
@@ -52,6 +45,7 @@ def logistic_map_attractor(N = 5000, A = 4, data_0 = np.pi / 10.0):
     return data
 
 def mean_attractor_radius(nmax, recsp):
+    # Calculates the mean attractor radius
     D = np.zeros(nmax)
     for count in range(nmax):
         D[count] = linalg.norm(recsp[count, :])
@@ -87,6 +81,7 @@ def Stau(recsp, EPNb, tauS = 1, tauL = 50, nst = 0, ned = 999):
     # This function calculates the stretching factor S(Tau) as proposed by
     # H. Kantz, 'A robust method to estimate the maximal Lyapunov exponent of a time series'
     # Physics Letters A, Volume 185, Issue 1, Pages 77-87, 1994.
+    # The gradient of S vs. Tau provides the maximal Lyapunov exponent for an orbit.
     N = range(nst, ned + 1, 1)
     StauTbl = np.zeros([0, 2])
     for tad in range(tauS, tauL + 1):
@@ -113,12 +108,66 @@ def Stau(recsp, EPNb, tauS = 1, tauL = 50, nst = 0, ned = 999):
     y = StauTbl[:, 1] #stretching factor
     return x, y
 
-def demonstration():
-    # this function demonstrates how to calculate the maximal Lyapunov exponent
-    # using the functions above    
+def grassberger_procaccia(r, recsp):
+    # This code shows how to calculate the correlation dimension of a nonlinear system based on the
+    # equations proposed by:
+    # Peter Grassberger and Itamar Procaccia (1983). 
+    # "Measuring the Strangeness of Strange Attractors". Physica D: Nonlinear Phenomena. 9 (1‒2): 189‒208.
+    [nmax, dd] = np.shape(recsp)
+    LL = np.zeros([nmax,nmax])
+    for i in range(nmax):
+        for j in range(nmax):
+            LL[i, j] = linalg.norm(recsp[i, :] - recsp[j, :])
+    NN = np.zeros(nmax)
+    for i in range(nmax):
+        nnl = LL[i, :] 
+        nnl = nnl[i:nmax] 
+        nnl = np.sort(nnl)
+        k = nmax - i - 1
+        while nnl[k] > r:
+            k = k - 1
+        NN[i] = k
+    return np.sum(NN) * 2 / nmax ** 2
+
+def calc_corr_dim(recsp, r0, r1, Nr):
+    # Using a given range of distances, calculate the correlation dimension
+    # using the Grassberger Procaccia algorithm.
+    r = np.linspace(r0, r1, Nr)
+    C = np.zeros(len(r))
+    for q in range(len(r)):
+        C[q] = grassberger_procaccia(r[q], recsp)  
+        print("Step {} / {} complete...".format(q, len(r)))
+    return r, C
+
+def corr_dim_demonstration():
+    # This function demonstrates how to calculate the correlation dimension
+    # using the logistic map attractor as an example
     STARTTIME = time.time()
+    
+    data = logistic_map_attractor(N = 5000, A = 4, data_0 = np.pi / 10.0)
+    data = data[-1000:]
+    
+    recsp = ReconSp(tauI = 1, dm = 3, data = data) 
+    
+    r, C = calc_corr_dim(recsp, r0 = 0.01, r1 = 2, Nr = 20)
+    
+    print("Time taken for computation: {:.3f} s".format(time.time() - STARTTIME)) 
+    
+    plt.figure(figsize=(15,5))
+    plt.plot(np.log(r), np.log(C))
+    plt.xlabel('log(r)')
+    plt.ylabel('log(C)')
+    plt.show()
+    
+
+def lyapunov_demonstration():
+    # This function demonstrates how to calculate the maximal Lyapunov exponent
+    # using the logistic map attractor as an example
+    STARTTIME = time.time()
+    
     # create logistic map attractor data
     data = logistic_map_attractor(N = 5000, A = 4, data_0 = np.pi / 10.0)
+    data = data[1000:]
 
     # time delayed reconstruction
     recsp = ReconSp(tauI = 1, dm = 3, data = data) 
