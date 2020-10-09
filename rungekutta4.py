@@ -67,7 +67,7 @@ def lorentz_plot_demo(x_ax = 0, y_ax = 2):
         return xdot
     
     Y = ode_steps(xdot_fun, x0, t, params, rk4)
-    Y = Y[int(len(Y)*0.75):]
+    Y = Y[int(len(Y)*0.2):]
     
     plot(Y, x_ax, y_ax)
 
