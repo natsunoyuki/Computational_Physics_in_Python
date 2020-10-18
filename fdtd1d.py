@@ -1,106 +1,147 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#import time
 
-#This code serves to give a prototype of using the FDTD regime to simulate a 1-dimensional
-#laser with 1 port.
+# Usage:
+# fdtd = fdtd1d()
+# fdtd.run()
+# fdtd.plot()
 
-#STARTTIME=time.time()
-
-X = 500 #total grid cells to use
-source = 100-1 #power source position in cells, -1 for python 0 indexing
-T = 100000 #1500000 #time length
-
-#Electromagnetic Pulse Characteristics (CGS units)
-c = 1.0 #speed of light
-frequency = 1000
-T0 = 1.0 / frequency #period of the pulse
-tc = 5 * T0 / 2 #time constant
-sig = tc / 2 / np.sqrt(2 * np.log(2)) #gaussian pulse width parameter
-FWHM = 2 * np.sqrt(2 * np.log(2)) * sig #full wave half maximum
-gperp = 35
-gpara = gperp / 100
-ka = 1000
-
-#Cells and step sizes:
-dx = 1e-4 #cell size
-dt = dx / (1.0 * c) #Courant No. magic step size of 1 used
-
-#E field and H field constants
-c1 = 1/dt**2+gperp/dt
-c2 = 2/dt**2-ka**2-gperp**2
-c3 = 1/dt**2-gperp/dt
-c4 = ka*gperp/2/np.pi
-c5 = 1/dt+gpara/2
-c6 = 1/dt-gpara/2
-c7 = 2*np.pi*gpara/ka
-c8 = 1/dt+gperp/2
-c9 = -1/dt+gperp/2
-
-#Initialize field vectors in normalised CGS units
-Ez = np.zeros(X) #electric field
-Hy = np.zeros(X-1) #staggered grid which means H is one less cell than E
-
-#Initialize Absorbing Boundary Conditions
-#Ezl.yes=0 #Placeholder Variables for Absorbing Boundary Conditions, Left side
-Ezh = 0 #Placeholder Variables for Absorbing Boundary Conditions, Right side
-
-#This part is to change the relative permittivity for the dielectric slab
-E = np.ones(X)
-E[0] = 0 #perfect reflector
-die1 = 1 #left most position of dielectric slab
-die2 = 301 #right most position of dielectric slab
-n2 = 1.5 #refractive index of the dielectric slab
-E[die1:die2] = n2 ** 2 #dielectric constant strength E; n=sqrt(E)
-#note that we assume that the dielectric is a perfect magnetic material
-#i.e. U0 = 1 for all cells. So we do not need to explicitly have a vector for U0
-
-#Prepare vector to hold electric field at a particular location over the
-#entire time frame of the FDTD loop.
-yes = np.zeros(T) #field with dielectric
-sample = die2-1 #sampling location along the x axis, 0 indexing
-
-D0 = 1.0
-D = D0 * np.ones(X)
-P = np.zeros(X)
-Place = np.zeros(X) #one time step before
-Pold = np.zeros(X) #two time steps before
-
-#Main FDTD Loops
-for n in range(T):
-    #Update the polarization vector
-    P[die1:die2]=1/c1*(c2*P[die1:die2]-c3*Pold[die1:die2]-c4*Ez[die1:die2]*D[die1:die2])
-    Pold=Place.copy() #DO NOT SIMPLY USE Pold=Place! Use .copy() in python!
-    Place=P.copy() #carry the current value of P for two time steps
+class fdtd1d(object):
+    # This code serves to give a demonstration of using the FDTD method to 
+    # simulate a 1-dimensional laser with 1 port on the right side, and a 
+    # perfectly reflecting mirror on the left side of the cavity.
+    def __init__(self, X = 500, dx = 1e-4, T = 100000, source = 99,
+                 c = 1.0, frequency = 1000, 
+                 gperp = 35, ka = 1000, 
+                 die1 = 1, die2 = 301, n2 = 1.5, D0 = 1.0):
+        
+        # Physical simulation parameters
+        self.X = X # number of grid cells in the x direction
+        self.dx = dx # cell size
+        self.T = T # number of time steps
+        self.source = source # power source location in cells.
+        
+        # Lasing parameters in CGS units:
+        self.c = c # speed of light
+        self.frequency = frequency # frequency
+        self.T0 = 1.0 / frequency # period
+        self.tc = 5 * self.T0 / 2.0 # time constant
+        self.sig = self.tc / 2.0 / np.sqrt(2 * np.log(2)) # gaussian width
+        self.FWHM = 2 * np.sqrt(2 * np.log(2)) * self.sig # FWHM of pulse
+        self.gperp = gperp # g_perpendicular lasing parameter
+        self.gpara = gperp / 100.0 # p_parallel lasing parameter
+        self.ka = ka # ka lasing parameter
+        
+        self.dt = self.dx / (1.0 * self.c) # Courant No. magic step size = 1
+        
+        # E field and H field constants
+        self.c1 = 1.0 / self.dt ** 2 + self.gperp / self.dt
+        self.c2 = 2.0 / self.dt ** 2 - self.ka**2 - self.gperp ** 2
+        self.c3 = 1.0 / self.dt ** 2 - self.gperp / self.dt
+        self.c4 = self.ka * self.gperp / 2.0 / np.pi
+        self.c5 = 1.0 / self.dt + self.gpara / 2.0
+        self.c6 = 1.0 / self.dt - self.gpara / 2.0
+        self.c7 = 2.0 * np.pi * self.gpara / ka
+        self.c8 = 1.0 / self.dt + self.gperp / 2.0
+        self.c9 = -1.0 / self.dt + self.gperp / 2.0
+              
+        # Initialize field vectors in normalised CGS units
+        # electric field
+        self.Ez = np.zeros(self.X) 
+        # staggered grid which means H is one fewer grid cell than E
+        self.Hy = np.zeros(self.X - 1) 
+        
+        # Initialize Absorbing Boundary Conditions
+        # Placeholder Variables for Absorbing Boundary Conditions, Left side
+        #self.Ezl.yes=0
+        # Placeholder Variables for Absorbing Boundary Conditions, Right side
+        self.Ezh = 0 
+        
+        # Change the relative permittivity for the dielectric slab
+        self.E = np.ones(self.X)
+        self.E[0] = 0 # perfect reflector on the left side
+        self.die1 = die1 # left most position of dielectric slab
+        self.die2 = die2 # right most position of dielectric slab
+        self.n2 = n2 # refractive index of the dielectric slab
+        self.E[die1:die2] = n2 ** 2 # dielectric constant strength E
+        # we assume that the dielectric is a perfect magnetic material
+        # U0 = 1 for all cells. So we do not need to explicitly have a vector 
+        # for U0
+        
+        # Prepare vector to hold electric field at a particular location over 
+        # the entire time frame of the FDTD loop.
+        self.Et = np.zeros(self.T) # time based field measured at sample
+        self.sample = die2 - 1 # sampling location along the x axis, 0 indexing
+        
+        self.D0 = D0 # polarization constant
+        self.D = self.D0 * np.ones(X)
+        self.P = np.zeros(X) # polarization vector
+        self.Place = np.zeros(X) # polarization one time step before
+        self.Pold = np.zeros(X) # polarization two time steps before
+        
+    def get_fields(self):
+        return self.Ez, self.Hy
     
-    #Update electric field vector
-    Ez[1:X-1]=Ez[1:X-1]-4*np.pi/E[1:X-1]*(P[1:X-1]-Pold[1:X-1])-dt/dx/E[1:X-1]*np.diff(Hy)
-    
-    #Update Population Inversion Vector
-    D[die1:die2]=1/c5*(c6*D[die1:die2]+gpara*D0+c7*Ez[die1:die2]*(c8*P[die1:die2]+c9*Pold[die1:die2]))
-    
-    #Initiate pulse
-    pulse = np.exp((-((n+1)*dt-3*np.sqrt(2)*sig)**2)/(2*sig**2))
-    Ez[source] = Ez[source] + pulse
-    
-    #1st order Mur Boundaries for dielectric
-    Ez[X-1] = Ezh+(c*dt-dx)/(c*dt+dx)*(Ez[X-2]-Ez[X-1]);
-    Ezh = Ez[X-2]
-    
-    #update magnetic field vect WITH DIELECTRIC
-    Hy=Hy-dt/dx*np.diff(Ez)
-    
-    #Save the sample data to a vector for export
-    yes[n]=Ez[sample]
+    def get_et(self):
+        return self.Et
 
-    if np.remainder(n,10000)==0:
-        print('Percent Complete:', n/T*100)
+    def run(self):
+        print("Running FDTD...")
+        # Main FDTD Loops
+        for n in range(self.T):
+            # Update the polarization vector
+            self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.Ez[self.die1:self.die2] * self.D[self.die1:self.die2])
+            self.Pold = self.Place.copy() # DO NOT SIMPLY USE Pold=Place! Use .copy() in python!
+            self.Place = self.P.copy() # carry the current value of P for two time steps
+            
+            # Update electric field vector
+            self.Ez[1:self.X-1] = self.Ez[1:self.X-1] - 4 * np.pi / self.E[1:self.X-1] * (self.P[1:self.X-1] - self.Pold[1:self.X-1]) - self.dt / self.dx / self.E[1:self.X-1] * np.diff(self.Hy)
+            
+            # Update Population Inversion Vector
+            self.D[self.die1:self.die2] = 1.0 / self.c5 * (self.c6 * self.D[self.die1:self.die2] + self.gpara * self.D0 + self.c7 * self.Ez[self.die1:self.die2] * (self.c8 * self.P[self.die1:self.die2] + self.c9 * self.Pold[self.die1:self.die2]))
+            
+            # Initiate EM pulse
+            pulse = np.exp((-((n+1) * self.dt - 3 * np.sqrt(2) * self.sig)**2) / (2*self.sig**2))
+            self.Ez[self.source] = self.Ez[self.source] + pulse
+            
+            # 1st order Mur Boundaries for dielectric to absorb the outgoing field
+            self.Ez[self.X-1] = self.Ezh+(self.c * self.dt - self.dx) / (self.c * self.dt + self.dx) * (self.Ez[self.X-2] - self.Ez[self.X-1])
+            self.Ezh = self.Ez[self.X-2]
+            
+            # update magnetic field vect WITH DIELECTRIC
+            self.Hy = self.Hy - self.dt / self.dx * np.diff(self.Ez)
+            
+            # Save the sample data to a vector for export
+            self.Et[n] = self.Ez[self.sample]
+        
+            if np.remainder(n, int(self.T / 10)) == 0:
+                print('Percent Complete: {:.0f}%'.format(n / self.T * 100))
+                
+        print("Run complete!")
 
-#plot the E and H fields in space
-plt.subplot(2,1,1)
-plt.plot(Ez)
-plt.ylabel('Electric Field')
-plt.subplot(2,1,2)
-plt.plot(Hy)
-plt.ylabel('Magnetic Field')
-plt.show()
+    def plot(self):
+        # plot the Ez and Hy fields in space
+        plt.figure(figsize = (10, 5))
+        plt.subplot(2,1,1)
+        plt.plot(self.Ez, 'b')
+        plt.axvline(x = self.die1, color = 'k')
+        plt.axvline(x = self.die2, color = 'k', linestyle = '-.')
+        plt.ylabel('Ez')
+        plt.grid('on')
+        plt.subplot(2,1,2)
+        plt.plot(self.Hy, 'r')
+        plt.axvline(x = self.die1, color = 'k')
+        plt.axvline(x = self.die2, color = 'k', linestyle = '-.')
+        plt.ylabel('Hy')
+        plt.xlabel("x")
+        plt.grid('on')
+        plt.show()
+        
+    def plot_et(self):
+        # plot the time based solution Et
+        plt.figure(figsize = (10, 5))
+        plt.plot(self.Et)
+        plt.xlabel("t")
+        plt.ylabel("Ez(t)")
+        plt.grid('on')
+        plt.show()
