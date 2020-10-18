@@ -14,6 +14,20 @@ class fdtd1d(object):
                  c = 1.0, frequency = 1000, 
                  gperp = 35, ka = 1000, 
                  die1 = 1, die2 = 301, n2 = 1.5, D0 = 1.0):
+        """FDTD input arguments in CGS units:
+        X: number of grid cells in the x direction
+        dx: grid cell size
+        T: number of time steps to use in the simulation
+        source: location of power source in the laser
+        c: speed of light
+        frequency: frequency of the power source
+        gperp: g_perpendicular lasing parameter
+        ka: ka lasing parameter
+        die1: starting location of the laser dielectric
+        die2: ending location of the laser dielectric
+        n2: refractive index of the laser dielectric
+        D0: polarization constant of the laser dielectric
+        """
         
         # Physical simulation parameters
         self.X = X # number of grid cells in the x direction
