@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def make_fs_coeff(f, x, r):
     coeffa = np.zeros(r) # coefficient of cosine terms
     coeffb = np.zeros(r) # coefficient of sine terms
