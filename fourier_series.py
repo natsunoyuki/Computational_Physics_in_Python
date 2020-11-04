@@ -1,6 +1,16 @@
 import numpy as np
 
 def make_fs_coeff(f, x, r):
+    """
+    Calculates the sin and cos coefficients of the Fourier series
+    Inputs:
+    f: function to approximate with Fourier series
+    x: x-axis variable of f(x)
+    r: order of the Fourier series
+    Outputs:
+    coeffa: array of cos coefficients
+    coeffb: array of sin coefficients
+    """
     coeffa = np.zeros(r) # coefficient of cosine terms
     coeffb = np.zeros(r) # coefficient of sine terms
     L = np.abs(x[-1] - x[0]) # 'Period' of Fourier Series
@@ -14,6 +24,15 @@ def make_fs_coeff(f, x, r):
     return coeffa, coeffb
     
 def real_fourier_series(f, x, r = 5):
+    """
+    Approximate function f with order r Fourier series
+    Inputs:
+    f: function to approximate
+    x: x-axis variable of f(x)
+    r: order of the Fourier series
+    Outputs:
+    F: Fourier series approximated f
+    """
     coeffa, coeffb = make_fs_coeff(f, x, r)   
     L = np.abs(x[-1] - x[0]) # 'Period' of Fourier Series
     F = np.zeros(len(x))
@@ -24,6 +43,16 @@ def real_fourier_series(f, x, r = 5):
     return F
 
 def make_cplx_fs_coeff(f, x, r):
+    """
+    Calculates the real and imaginary coefficients of the Fourier series
+    Inputs:
+    f: function to approximate with Fourier series
+    x: x-axis variable of f(x)
+    r: order of the Fourier series
+    Outputs:
+    coeffcr: array of real coefficients
+    coeffci: array of imaginary coefficients
+    """
     # complex fourier series coefficients
     coeffcr = np.zeros(2*r+1)
     coeffci = np.zeros(2*r+1)
@@ -37,6 +66,15 @@ def make_cplx_fs_coeff(f, x, r):
     return coeffcr, coeffci
 
 def cplx_fourier_series(f, x, r):
+    """
+    Approximate function f with order r Fourier series
+    Inputs:
+    f: function to approximate
+    x: x-axis variable of f(x)
+    r: order of the Fourier series
+    Outputs:
+    G: Fourier series approximated f
+    """    
     coeffcr, coeffci = make_cplx_fs_coeff(f, x, r)
     G = np.zeros(len(x))
     L = np.abs(x[-1] - x[0]) # 'Period' of Fourier Series
