@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse import linalg as sla
  
-def schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0=0.0,findpsi=False):
+def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
+                  Vfun2D, params, neigs, E0=0.0, findpsi=False):
     x = np.linspace(xmin, xmax, Nx)  
     dx = x[1] - x[0]  
     y = np.linspace(ymin, ymax, Ny)
@@ -11,7 +12,7 @@ def schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0=0.0,findpsi=F
 
     V = Vfun2D(x, y, params)
 
-    #create the 2D Hamiltonian matrix
+    # create the 2D Hamiltonian matrix
     Hx = sparse.lil_matrix(2 * np.eye(Nx))
     for i in range(Nx - 1):
         Hx[i, i + 1] = -1
@@ -28,12 +29,12 @@ def schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0=0.0,findpsi=F
     Iy = sparse.lil_matrix(np.eye(Ny))
     H = sparse.kron(Iy, Hx) + sparse.kron(Hy, Ix)  
 
-    #Convert to lil form and add potential energy function
+    # Convert to lil form and add potential energy function
     H = H.tolil()
     for i in range(Nx * Ny):
         H[i, i] = H[i, i] + V[i]    
 
-    #convert to csc form and solve the eigenvalue problem
+    # convert to csc form and solve the eigenvalue problem
     H = H.tocsc()  
     [evl, evt] = sla.eigs(H, k=neigs, sigma=E0)
             
@@ -42,30 +43,30 @@ def schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0=0.0,findpsi=F
     else: 
         return evl, evt, x, y
     
-def eval_wavefunctions(xmin,xmax,Nx,
-                       ymin,ymax,Ny,
-                       Vfun,params,neigs,E0,findpsi):
+def eval_wavefunctions(xmin, xmax, Nx,
+                       ymin, ymax, Ny,
+                       Vfun, params, neigs, E0, findpsi):
         
     H = schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun,params,neigs,E0,findpsi)
-    evl = H[0] #eigenvalues
+    evl = H[0] # eigenvalues
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
     for i,j in enumerate(evl[indices]):
-        print("{}: {:.2f}".format(i+1,np.real(j)))
-    evt = H[1] #eigenvectors
-    plt.figure(figsize=(8,8))
-    #unpack the vector into 2 dimensions for plotting:
+        print("{}: {:.2f}".format(i + 1, np.real(j)))
+    evt = H[1] # eigenvectors
+    plt.figure(figsize=(8, 8))
+    # unpack the vector into 2 dimensions for plotting:
     for n in range(neigs):
         psi = evt[:, n]  
         PSI = oneD_to_twoD(Nx, Ny, psi)
         plt.subplot(2, int(neigs/2), n + 1)    
-        plt.pcolormesh(np.flipud(PSI),cmap='jet')
+        plt.pcolormesh(np.flipud(PSI), cmap = 'binary')
         plt.axis('equal')
         plt.axis('off')
     plt.show()
 
 def twoD_to_oneD(Nx, Ny, F):
-    #from a 2D matrix F return a 1D vector V
+    # from a 2D matrix F return a 1D vector V
     V = np.zeros([Nx * Ny, 1])
     vindex = 0
     for i in range(Ny):
@@ -75,7 +76,7 @@ def twoD_to_oneD(Nx, Ny, F):
     return V
 
 def oneD_to_twoD(Nx, Ny, psi):
-    #from a 1D vector psi return a 2D matrix PSI
+    # from a 1D vector psi return a 2D matrix PSI
     vindex = 0
     PSI = np.zeros([Ny, Nx])
     for i in range(Ny):
@@ -84,8 +85,8 @@ def oneD_to_twoD(Nx, Ny, psi):
             vindex = vindex + 1 
     return PSI
 
-def sho_wavefunctions_plot(xmin=-10,xmax=10,Nx=250,
-                           ymin=-10,ymax=10,Ny=250,
+def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
+                           ymin=-10, ymax=10, Ny=250,
                            params=[1,1], neigs=8, E0=10, findpsi=True):
     
     def Vfun(X, Y, params):
@@ -104,10 +105,10 @@ def sho_wavefunctions_plot(xmin=-10,xmax=10,Nx=250,
                        ymin,ymax,Ny,
                        Vfun,params,neigs,E0,findpsi)
 
-def stadium_wavefunctions_plot(R=1, L=2, V0=10000, neigs=6, E0=1000):
-    #R = stadium radius
-    #L = stadium length
-    #V0 = stadium wall potential
+def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500):
+    # R = stadium radius
+    # L = stadium length
+    # V0 = stadium wall potential
     ymin = -0.5 * L - R
     ymax = 0.5 * L + R
     xmin = -R
@@ -120,10 +121,10 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=10000, neigs=6, E0=1000):
     print("Nx, Ny:",Nx, Ny)
     
     def Vfun2D(X, Y, params):
-        R = params[0] #stadium radius
-        L = params[1] #stadium length
-        V0 = params[2] #stadium wall potential
-        #stadium potential function
+        R = params[0] # stadium radius
+        L = params[1] # stadium length
+        V0 = params[2] # stadium wall potential
+        # stadium potential function
         Nx = len(X)
         Ny = len(Y)
         [x, y] = np.meshgrid(X, Y)
@@ -135,7 +136,7 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=10000, neigs=6, E0=1000):
                     F[j, i] = V0
                 if (abs(Y[j]) - 0.5 * L) > 0 and np.sqrt((abs(Y[j]) - 0.5 * L) ** 2 + X[i] ** 2) >= R:
                     F[j, i] = V0
-        #simplify the 2D matrix to a 1D array for faster processing:
+        # simplify the 2D matrix to a 1D array for faster processing:
         V = twoD_to_oneD(Nx, Ny, F)                
         return V
  
