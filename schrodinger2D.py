@@ -59,15 +59,16 @@ def eval_wavefunctions(xmin, xmax, Nx,
     for n in range(neigs):
         psi = evt[:, n]  
         PSI = oneD_to_twoD(Nx, Ny, psi)
+        PSI = np.abs(PSI)
         plt.subplot(2, int(neigs/2), n + 1)    
-        plt.pcolormesh(np.flipud(PSI), cmap = 'binary')
+        plt.pcolormesh(np.flipud(PSI), cmap = 'jet')
         plt.axis('equal')
         plt.axis('off')
     plt.show()
 
 def twoD_to_oneD(Nx, Ny, F):
     # from a 2D matrix F return a 1D vector V
-    V = np.zeros([Nx * Ny, 1])
+    V = np.zeros(Nx * Ny)
     vindex = 0
     for i in range(Ny):
         for j in range(Nx):
@@ -78,7 +79,7 @@ def twoD_to_oneD(Nx, Ny, F):
 def oneD_to_twoD(Nx, Ny, psi):
     # from a 1D vector psi return a 2D matrix PSI
     vindex = 0
-    PSI = np.zeros([Ny, Nx])
+    PSI = np.zeros([Ny, Nx], dtype='complex')
     for i in range(Ny):
         for j in range(Nx):
             PSI[i, j] = psi[vindex]
@@ -93,7 +94,7 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
         Nx = len(X)
         Ny = len(Y)
         M = Nx * Ny
-        V = np.zeros([M, 1])
+        V = np.zeros(M)
         vindex = 0
         for i in range(Nx):
             for j in range(Ny):
