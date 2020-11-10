@@ -51,20 +51,21 @@ def eval_wavefunctions(xmin, xmax, Nx,
     evl = H[0] # eigenvalues
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
-    for i,j in enumerate(evl[indices]):
-        print("{}: {:.2f}".format(i + 1, np.real(j)))
+    for i, j in enumerate(evl[indices]):
+        print("{}: {:.2f}".format(i, np.real(j)))
     evt = H[1] # eigenvectors
-    plt.figure(figsize=(8, 8))
+    
     # unpack the vector into 2 dimensions for plotting:
     for n in range(neigs):
+        plt.figure(figsize=(8, 8))
         psi = evt[:, n]  
         PSI = oneD_to_twoD(Nx, Ny, psi)
         PSI = np.abs(PSI)**2
-        plt.subplot(2, int(neigs/2), n + 1)    
+        #plt.subplot(2, int(neigs/2), n + 1)    
         plt.pcolormesh(np.flipud(PSI), cmap = 'jet')
         plt.axis('equal')
         plt.axis('off')
-    plt.show()
+        plt.show()
 
 def twoD_to_oneD(Nx, Ny, F):
     # from a 2D matrix F return a 1D vector V
