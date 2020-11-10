@@ -59,7 +59,7 @@ def eval_wavefunctions(xmin, xmax, Nx,
     for n in range(neigs):
         psi = evt[:, n]  
         PSI = oneD_to_twoD(Nx, Ny, psi)
-        PSI = np.abs(PSI)
+        PSI = np.abs(PSI)**2
         plt.subplot(2, int(neigs/2), n + 1)    
         plt.pcolormesh(np.flipud(PSI), cmap = 'jet')
         plt.axis('equal')
@@ -115,7 +115,7 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500):
     xmin = -R
     xmax = R
     params = [R, L, V0]
-    print("Axis limits:",xmin, xmax, ymin, ymax)
+    print("Axis limits:", xmin, xmax, ymin, ymax)
 
     Ny = 250
     Nx = int(Ny * 2 * R / (2.0 * R + L))
