@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import linalg
-from scipy import randn
+from numpy.random import randn
 from scipy import signal
 
 # This code demonstrates the Sompi algorithm used to decompose a signal into
