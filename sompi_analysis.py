@@ -14,6 +14,16 @@ from scipy import signal
 # characteristic property of a linear dynamic system
 
 def sompi(X, dt, m_order_min=4, m_order_max=40, d_m_order=1):
+    """
+    Inputs:
+    X: time series signal to analyse
+    dt: time step size
+    m_order_min: minimum Sompi order
+    m_order_max: maximum Sompi order
+    d_m_order: Sompi order step size
+    Outputs:
+    F, G: Sompi real and imaginary frequency components
+    """
     F = []
     G = []
     
