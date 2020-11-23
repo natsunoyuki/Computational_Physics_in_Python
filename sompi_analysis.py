@@ -13,19 +13,19 @@ from scipy import signal
 # BASED ON KUMAZAWA et al. 1990, A theory of spectral analysis based on the 
 # characteristic property of a linear dynamic system
 
-def sompi(X, dt, MORDERMIN=4,MORDERMAX=40,DMORDER=1):
+def sompi(X, dt, m_order_min=4, m_order_max=40, d_m_order=1):
     F = []
     G = []
     
-    NORDER=len(X) # total number of data points in the time series
-    for MORDER in range(MORDERMIN, MORDERMAX+DMORDER, DMORDER):
-        P = np.zeros([MORDER+1, MORDER+1]) # P(k,l) matrix
-        for k in range(0, MORDER+1, 1):
-            for l in range(0, MORDER+1, 1):
-                for t in range(MORDER, NORDER, 1):
+    n_order = len(X) # total number of data points in the time series
+    for m_order in range(m_order_min, m_order_max+d_m_order, d_m_order):
+        P = np.zeros([m_order+1, m_order+1]) # P(k,l) matrix
+        for k in range(0, m_order+1, 1):
+            for l in range(0, m_order+1, 1):
+                for t in range(m_order, n_order, 1):
                     P[k, l] = P[k, l] + X[t-k] * X[t-l]
                     
-        P = P / (NORDER - MORDER) # TAKE THE AVERAGE!
+        P = P / (n_order - m_order) # TAKE THE AVERAGE!
         [val, vct] = linalg.eig(P)
         val = np.real(val) # both val and vct should be real! Drop +0j parts
         #vct = np.real(vct)
