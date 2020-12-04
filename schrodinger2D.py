@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import sparse
+from scipy import sparse, linalg
 from scipy.sparse import linalg as sla
+from mpl_toolkits.mplot3d import Axes3D
  
 def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
                   Vfun2D, params, neigs, E0=0.0, findpsi=False):
@@ -13,17 +14,8 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
     V = Vfun2D(x, y, params)
 
     # create the 2D Hamiltonian matrix
-    Hx = sparse.lil_matrix(2 * np.eye(Nx))
-    for i in range(Nx - 1):
-        Hx[i, i + 1] = -1
-        Hx[i + 1, i] = -1
-    Hx = Hx / (dx ** 2)
-    
-    Hy = sparse.lil_matrix(2 * np.eye(Ny))
-    for i in range(Ny - 1):
-        Hy[i, i + 1] = -1
-        Hy[i + 1, i] = -1
-    Hy = Hy / (dy ** 2)
+    Hx = create_hamiltonian(Nx, dx)
+    Hy = create_hamiltonian(Ny, dy)
 
     Ix = sparse.lil_matrix(np.eye(Nx))
     Iy = sparse.lil_matrix(np.eye(Ny))
@@ -42,6 +34,14 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
         return evl
     else: 
         return evl, evt, x, y
+
+def create_hamiltonian(Nx, dx):
+    H = sparse.eye(Nx, Nx, format='lil') * 2
+    for i in range(Nx - 1):
+        H[i, i + 1] = -1
+        H[i + 1, i] = -1
+    H = H / (dx ** 2)  
+    return H
     
 def eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
@@ -51,21 +51,20 @@ def eval_wavefunctions(xmin, xmax, Nx,
     evl = H[0] # eigenvalues
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
-    for i, j in enumerate(evl[indices]):
-        print("{}: {:.2f}".format(i, np.real(j)))
+    for i,j in enumerate(evl[indices]):
+        print("{}: {:.2f}".format(i + 1, np.real(j)))
     evt = H[1] # eigenvectors
-    
+    plt.figure(figsize=(15, 15))
     # unpack the vector into 2 dimensions for plotting:
     for n in range(neigs):
-        plt.figure(figsize=(8, 8))
         psi = evt[:, n]  
         PSI = oneD_to_twoD(Nx, Ny, psi)
-        PSI = np.abs(PSI)**2
-        #plt.subplot(2, int(neigs/2), n + 1)    
+        PSI = np.abs(PSI)
+        plt.subplot(2, int(neigs/2), n + 1)    
         plt.pcolormesh(np.flipud(PSI), cmap = 'jet')
         plt.axis('equal')
         plt.axis('off')
-        plt.show()
+    plt.show()
 
 def twoD_to_oneD(Nx, Ny, F):
     # from a 2D matrix F return a 1D vector V
@@ -107,7 +106,7 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
                        ymin,ymax,Ny,
                        Vfun,params,neigs,E0,findpsi)
 
-def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500):
+def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
     # R = stadium radius
     # L = stadium length
     # V0 = stadium wall potential
@@ -116,9 +115,8 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500):
     xmin = -R
     xmax = R
     params = [R, L, V0]
-    print("Axis limits:", xmin, xmax, ymin, ymax)
+    print("Axis limits:",xmin, xmax, ymin, ymax)
 
-    Ny = 250
     Nx = int(Ny * 2 * R / (2.0 * R + L))
     print("Nx, Ny:",Nx, Ny)
     
