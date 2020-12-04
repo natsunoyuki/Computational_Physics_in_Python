@@ -17,8 +17,8 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
     Hx = create_hamiltonian(Nx, dx)
     Hy = create_hamiltonian(Ny, dy)
 
-    Ix = sparse.lil_matrix(np.eye(Nx))
-    Iy = sparse.lil_matrix(np.eye(Ny))
+    Ix = sparse.eye(Nx, Nx)
+    Iy = sparse.eye(Ny, Ny)
     H = sparse.kron(Iy, Hx) + sparse.kron(Hy, Ix)  
 
     # Convert to lil form and add potential energy function
