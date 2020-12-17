@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse, linalg
 from scipy.sparse import linalg as sla
-from mpl_toolkits.mplot3d import Axes3D
  
 def schrodinger3D(xmin, xmax, Nx, 
                   ymin, ymax, Ny, 
                   zmin, zmax, Nz, 
                   Vfun3D, params, neigs, E0=0.0, findpsi=False):
+ 
     x = np.linspace(xmin, xmax, Nx)  
     dx = x[1] - x[0]  
     y = np.linspace(ymin, ymax, Ny)
@@ -47,6 +47,9 @@ def schrodinger3D(xmin, xmax, Nx,
         return evl, evt, x, y, z
     
 def create_hamiltonian(Nx, dx):
+    """
+    This function creates a 1 dimensional Hamiltonian.
+    """
     H = sparse.eye(Nx, Nx, format='lil') * 2
     for i in range(Nx - 1):
         H[i, i + 1] = -1
@@ -63,6 +66,9 @@ def sho_eigenenergies(xmin = -5, xmax = 5, Nx = 50, ymin = -5, ymax = 5, Ny = 50
     by 2, the theoretical eigenenergies are given by: E = 2n + 3.
     """
     def Vfun(X, Y, Z, params):
+        """
+        This function returns the potential energies for a 3D quantum harmonic oscillator.
+        """
         Nx = len(X)
         Ny = len(Y)
         Nz = len(Z)
