@@ -69,6 +69,27 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
         return evl, evt, x
 
 def eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,findpsi=True):
+    """
+    Evaluates the wavefunctions given a particular potential energy function Vfun
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    Vfun: function
+        potential energy function
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.
+    """
     H = schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs, findpsi)
     evl = H[0] # energy eigen values
     indices = np.argsort(evl)
@@ -89,7 +110,22 @@ def eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,findpsi=True):
     plt.show()
 
 def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[1]):
+    """
+    Plots the 1D quantum harmonic oscillator wavefunctions.
     
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    neigs: int
+        number of eigenvalues to find          
+    params: list
+        list containing the parameters of Vfun     
+    """
     def Vfun(x, params):
         V = params[0] * x**2
         return V
@@ -97,7 +133,22 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[1]):
     eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,True)
     
 def infinite_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=1e10):
+    """
+    Plots the 1D infinite well wavefunctions.
     
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    neigs: int
+        number of eigenvalues to find          
+    params: float
+        parameter of Vfun     
+    """
     def Vfun(x, params):
         V = x*0
         V[:100]=params
@@ -106,8 +157,23 @@ def infinite_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params
     
     eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,True)
     
-def double_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500,
-        neigs=20, params=[-0.5,0.01]):
+def double_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[-0.5,0.01]):
+    """
+    Plots the 1D double well wavefunctions.
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    neigs: int
+        number of eigenvalues to find          
+    params: list
+        list of parameters of Vfun     
+    """
 
     def Vfun(x, params):
         A = params[0]
