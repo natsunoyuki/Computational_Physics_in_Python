@@ -4,12 +4,37 @@ from scipy import random
 import time
 random.seed() #seed the RNG.
 
-#This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
-#crystal. 2 methods are listed here.
-#The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
-#Ising model solved using the Heatbath algorithm.
-
 def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
+    """
+    This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
+    crystal. 2 methods are listed here.
+    The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
+    Ising model solved using the Heatbath algorithm.
+    
+    Inputs
+    ------
+    J: int
+        coupling strength
+    H: float
+        external magnetic field strength
+    T: np.array
+        np.array of temperatures to conduct the MC simulation over
+    Nx: int
+        number of spins along x
+    Ny: int
+        number of spins along y
+    steps: int
+        number of MC steps to take
+    warmup_steps: int
+        number of parallel processors to use
+        
+    Returns
+    -------
+    T: np.array
+        temperatures
+    M: np.array
+        magnetization
+    """
     start = time.time()
     N = Nx * Ny  # number of spins
     k = 1  # boltzmann constant
@@ -54,6 +79,9 @@ def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
     return [T,M]
 
 def ising2D(Nx,Ny,spin,pflip):
+    """
+    2D ising model
+    """
     N=Nx*Ny
     r = int32(random.random() * N)
     x = mod(r, Nx)
@@ -85,6 +113,34 @@ def ising2D(Nx,Ny,spin,pflip):
     
 
 def ising_metropolis_1D(J, H, T, N, steps, warmup_steps):
+    """
+    This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
+    crystal. 2 methods are listed here.
+    The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
+    Ising model solved using the Heatbath algorithm.
+    
+    Inputs
+    ------
+    J: int
+        coupling strength
+    H: float
+        external magnetic field strength
+    T: np.array
+        np.array of temperatures to conduct the MC simulation over
+    N: int
+        number of spins on each side of the cubic crystal
+    steps: int
+        number of MC steps to take
+    warmup_steps: int
+        number of MC warmup steps to take
+        
+    Returns
+    -------
+    T: np.array
+        temperatures
+    M: np.array
+        magnetization
+    """
     start = time.time()
     k = 1  # boltzmann constant
     M = zeros(len(T))
@@ -128,6 +184,9 @@ def ising_metropolis_1D(J, H, T, N, steps, warmup_steps):
     return [T,M] 
 
 def ising1D(N, spin, pflip):
+    """
+    1D ising model
+    """
     r = int(random.random() * N)  # randomly choose a lattice site
     s0 = spin[r]
     s1 = spin[mod(r + 1, N)]  #     S2 S0 S1       
