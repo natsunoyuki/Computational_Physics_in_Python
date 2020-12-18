@@ -1,18 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-"""
-Inspired by Numberphile video on the Golden Ratio:
-https://www.youtube.com/watch?v=sj8Sg8qnjOg&t=311s
-
-I wrote a short script to generate a "Golden Ratio Flower" as described in the 
-Numberphile video in the youtube link.
-"""
-
-phi = (1 + np.sqrt(5)) / 2.0 #golden ratio
+phi = (1 + np.sqrt(5)) / 2.0 # golden ratio
 
 def golden_ratio_flower(NTURNS):
-    #NTURNS = np.pi #number of turns for each seed placement
+    """
+    Inspired by Numberphile video on the Golden Ratio:
+    https://www.youtube.com/watch?v=sj8Sg8qnjOg&t=311s
+
+    I wrote a short script to generate a "Golden Ratio Flower" as described in the 
+    Numberphile video in the youtube link.
+    
+    Inputs
+    ------
+    NTURNS: float
+        number of turns for each seed placement. Can be float
+    """
     theta = 360.0 / NTURNS 
     theta = theta * np.pi / 180.0
     R = np.array([[np.cos(theta),-np.sin(theta)],[np.sin(theta),np.cos(theta)]]) #rotation matrix
