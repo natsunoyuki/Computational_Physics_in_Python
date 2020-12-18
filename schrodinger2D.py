@@ -75,21 +75,21 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0,
         return evl, evt, x, y
 
 def create_hamiltonian(Nx, dx):
-   """
-   Creates a 1 dimensional Hamiltonian
+    """
+    Creates a 1 dimensional Hamiltonian
    
-   Inputs
-   ------
-   Nx: int
-       number of elements in that axis
-   dx: float
-       step size
+    Inputs
+    ------
+    Nx: int
+        number of elements in that axis
+    dx: float
+        step size
        
-   Returns
-   -------
-   H: np.array
-       np.array of the Hamiltonian
-   """
+    Returns
+    -------
+    H: np.array
+        np.array of the Hamiltonian
+    """
     H = sparse.eye(Nx, Nx, format='lil') * 2
     for i in range(Nx - 1):
         H[i, i + 1] = -1
