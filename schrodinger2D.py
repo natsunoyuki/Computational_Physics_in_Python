@@ -4,8 +4,47 @@ from scipy import sparse, linalg
 from scipy.sparse import linalg as sla
 from mpl_toolkits.mplot3d import Axes3D
  
-def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
-                  Vfun2D, params, neigs, E0=0.0, findpsi=False):
+def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0, findpsi=False):
+    """
+    Solves the 2 dimensional Schrodinger equation numerically
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis        
+    Vfun2D: function
+        potential energy function
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.
+    
+    Returns
+    -------
+    evl: np.array
+        eigenvalues
+    evt: np.array
+        eigenvectors
+    x: np.array
+        x axis values
+    y: np.array
+        y axis values
+    """
     x = np.linspace(xmin, xmax, Nx)  
     dx = x[1] - x[0]  
     y = np.linspace(ymin, ymax, Ny)
@@ -36,6 +75,21 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny,
         return evl, evt, x, y
 
 def create_hamiltonian(Nx, dx):
+   """
+   Creates a 1 dimensional Hamiltonian
+   
+   Inputs
+   ------
+   Nx: int
+       number of elements in that axis
+   dx: float
+       step size
+       
+   Returns
+   -------
+   H: np.array
+       np.array of the Hamiltonian
+   """
     H = sparse.eye(Nx, Nx, format='lil') * 2
     for i in range(Nx - 1):
         H[i, i + 1] = -1
@@ -46,6 +100,36 @@ def create_hamiltonian(Nx, dx):
 def eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
                        Vfun, params, neigs, E0, findpsi):
+ 
+    """
+    Evaluates and plots the 2 dimensional Schrodinger equation numerically for some potential function Vfun
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis        
+    Vfun: function
+        potential energy function
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.
+    """ 
         
     H = schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun,params,neigs,E0,findpsi)
     evl = H[0] # eigenvalues
@@ -67,7 +151,23 @@ def eval_wavefunctions(xmin, xmax, Nx,
     plt.show()
 
 def twoD_to_oneD(Nx, Ny, F):
-    # from a 2D matrix F return a 1D vector V
+    """
+    from a 2D matrix F return a 1D vector V
+    
+    Inputs
+    ------
+    Nx: int
+        number of elements in the x axis
+    Ny: int
+        number of elements in the y axis
+    F: np.array
+        2D np.array to convert to 1D
+        
+    Returns
+    -------
+    V: np.array
+        converted 1D array
+    """
     V = np.zeros(Nx * Ny)
     vindex = 0
     for i in range(Ny):
@@ -77,7 +177,23 @@ def twoD_to_oneD(Nx, Ny, F):
     return V
 
 def oneD_to_twoD(Nx, Ny, psi):
-    # from a 1D vector psi return a 2D matrix PSI
+    """
+    from a 1D vector psi return a 2D matrix PSI
+    
+    Inputs
+    ------
+    Nx: int
+        number of elements in the x axis
+    Ny: int
+        number of elements in the y axis
+    psi: np.array
+        1D np.array to convert to 2D
+        
+    Returns
+    -------
+    PSI: np.array
+        converted 2D array
+    """
     vindex = 0
     PSI = np.zeros([Ny, Nx], dtype='complex')
     for i in range(Ny):
@@ -89,6 +205,33 @@ def oneD_to_twoD(Nx, Ny, psi):
 def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
                            ymin=-10, ymax=10, Ny=250,
                            params=[1,1], neigs=8, E0=10, findpsi=True):
+    """
+    Evaluates and plots the 2D QSHO wavefunctions.
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis        
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.    
+    """
     
     def Vfun(X, Y, params):
         Nx = len(X)
@@ -107,9 +250,24 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
                        Vfun,params,neigs,E0,findpsi)
 
 def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
-    # R = stadium radius
-    # L = stadium length
-    # V0 = stadium wall potential
+    """
+    Evaluates and plots the 2D stadium potential wavefunctions.
+    
+    Inputs
+    ------
+    R: float
+        stadium radius
+    L: float
+        stadium length
+    V0: float
+        stadium wall potential
+    neigs: int
+        number of eigenvalues to solve for
+    E0: float
+        eigenvalue to solve for
+    Ny: int
+        number of elements in the y axis
+    """
     ymin = -0.5 * L - R
     ymax = 0.5 * L + R
     xmin = -R
