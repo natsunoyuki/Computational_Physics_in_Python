@@ -7,33 +7,51 @@ import matplotlib.pyplot as plt
 # fdtd.plot()
 
 class fdtd1d(object):
-    # This code serves to give a demonstration of using the FDTD method to 
-    # simulate a 1-dimensional laser with 1 port on the right side, and a 
-    # perfectly reflecting mirror on the left side of the cavity.
-    # On the left side of the integration grid a 1st order Mur boundary is
-    # emplaced as the absorbing boundary conditions. Therefore the laser is
-    # restricted to output only on the right side of the cavity.
+    """
+    This code serves to give a demonstration of using the FDTD method to 
+    simulate a 1-dimensional laser with 1 port on the right side, and a 
+    perfectly reflecting mirror on the left side of the cavity.
+    On the left side of the integration grid a 1st order Mur boundary is
+    emplaced as the absorbing boundary conditions. Therefore the laser is
+    restricted to output only on the right side of the cavity.
+    """
     def __init__(self, X = 500, dx = 1e-4, T = 100000, source = 99,
                  c = 1.0, frequency = 1000, 
                  gperp = 35, ka = 1000, 
                  die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0,
                  sample = 300):
-        """FDTD input arguments in CGS units:
-        X: number of grid cells in the x direction
-        dx: grid cell size
-        T: number of time steps to use in the simulation
-        source: location of power source in the laser
-        c: speed of light
-        frequency: frequency of the power source
-        gperp: g_perpendicular lasing parameter
-        ka: ka lasing parameter
-        die1: starting location of the laser cavity dielectric
-        die2: ending location of the laser cavity dielectric
-        n1: refractive index of the surrounding medium
-        n2: refractive index of the laser dielectric
-        n3: refractive index of the output mirror
-        D0: polarization constant of the laser dielectric
-        sample: location along the dielectric to measure the time dependent electric field
+        """
+        FDTD input arguments in CGS units:
+        X: int
+            number of grid cells in the x direction
+        dx: float
+            grid cell size
+        T: int
+            number of time steps to use in the simulation
+        source: int
+            index location of power source in the laser
+        c: float
+            speed of light
+        frequency: float
+            frequency of the power source
+        gperp: float
+            g_perpendicular lasing parameter
+        ka: float
+            ka lasing parameter
+        die1: int
+            starting index location of the laser cavity dielectric
+        die2: int
+            ending index location of the laser cavity dielectric
+        n1: float
+            refractive index of the surrounding medium
+        n2: float
+            refractive index of the laser dielectric
+        n3: float
+            refractive index of the output mirror
+        D0: float
+            polarization constant of the laser dielectric
+        sample: int
+            index location along the dielectric to measure the time dependent electric field
         """
         
         # Physical simulation parameters
@@ -139,7 +157,9 @@ class fdtd1d(object):
         print("Run complete!")
 
     def plot(self):
-        # plot the Ez and Hy fields in space
+        """
+        plot the Ez and Hy fields in space
+        """
         plt.figure(figsize = (10, 5))
         plt.subplot(2, 1, 1)
         plt.plot(self.Ez, 'b')
@@ -157,7 +177,9 @@ class fdtd1d(object):
         plt.show()
         
     def plot_et(self, t0 = None, t1 = None):
-        # plot the time dependent electric field solution Et
+        """
+        plot the time dependent electric field solution Et
+        """
         if t0 is None:
             t0 = 0
         if t1 is None:
