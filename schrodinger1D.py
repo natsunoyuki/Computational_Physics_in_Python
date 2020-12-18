@@ -4,6 +4,36 @@ from scipy import sparse
 from scipy.sparse import linalg as sla
 
 def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
+    """
+    Solves the 1 dimensional Schrodinger equation numerically
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    Vfun: function
+        potential energy function
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.
+    
+    Returns
+    -------
+    evl: np.array
+        eigenvalues
+    evt: np.array
+        eigenvectors
+    x: np.array
+        x axis values
+    """
     # for this code we are using Dirichlet Boundary Conditions
     x = np.linspace(xmin, xmax, Nx)  # x axis grid
     dx = x[1] - x[0]  # x axis step size
