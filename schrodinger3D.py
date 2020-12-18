@@ -7,7 +7,54 @@ def schrodinger3D(xmin, xmax, Nx,
                   ymin, ymax, Ny, 
                   zmin, zmax, Nz, 
                   Vfun3D, params, neigs, E0=0.0, findpsi=False):
- 
+    """
+    Solves the 3 dimensional Schrodinger equation numerically
+    
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis   
+    zmin: float
+        minimum value of the z axis
+    zmax: float
+        maximum value of the z axis
+    Nz: int
+        number of finite elements in the z axis           
+    Vfun3D: function
+        potential energy function
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
+    findpsi: bool
+        If True, the eigen wavefunctions will be calculated and returned.
+        If False, only the eigen energies will be found.
+    
+    Returns
+    -------
+    evl: np.array
+        eigenvalues
+    evt: np.array
+        eigenvectors
+    x: np.array
+        x axis values
+    y: np.array
+        y axis values
+    z: np.array
+        z axis values
+    """ 
     x = np.linspace(xmin, xmax, Nx)  
     dx = x[1] - x[0]  
     y = np.linspace(ymin, ymax, Ny)
@@ -49,6 +96,13 @@ def schrodinger3D(xmin, xmax, Nx,
 def create_hamiltonian(Nx, dx):
     """
     This function creates a 1 dimensional Hamiltonian.
+    
+    Inputs
+    ------
+    Nx: int
+        number of elements in the 1 spatial dimension
+    dx: float
+        step size of the 1 spatial dimension
     """
     H = sparse.eye(Nx, Nx, format='lil') * 2
     for i in range(Nx - 1):
@@ -64,10 +118,51 @@ def sho_eigenenergies(xmin = -5, xmax = 5, Nx = 50, ymin = -5, ymax = 5, Ny = 50
     Theoretically, the eigenenergies are given by: E = hw(n + 3/2), n = nx + ny + nz.
     However, as we set h = w = 1, and we scale the energies during the Hamiltonian creation
     by 2, the theoretical eigenenergies are given by: E = 2n + 3.
+
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis   
+    zmin: float
+        minimum value of the z axis
+    zmax: float
+        maximum value of the z axis
+    Nz: int
+        number of finite elements in the z axis           
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
     """
     def Vfun(X, Y, Z, params):
         """
         This function returns the potential energies for a 3D quantum harmonic oscillator.
+        
+        Inputs
+        ------
+        X: np.array
+            np.array of the x axis
+        Y: np.array
+            np.array of the y axis
+        Z: np.array
+            np.array of the z axis
+        params: list
+            list of parameters for the potential energy function
+        
+        Returns
+        -------
+        V: np.array
+            np.array of the potential energy of the 3D QSHO
         """
         Nx = len(X)
         Ny = len(Y)
