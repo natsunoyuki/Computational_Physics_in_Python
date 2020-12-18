@@ -164,6 +164,13 @@ def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
         number of MC steps to take
     nprocs: int
         number of parallel processors to use
+        
+    Returns
+    -------
+    T2: np.array
+        temperatures
+    M2: np.array
+        magnetization
     """
     starttime = time.time()
     
