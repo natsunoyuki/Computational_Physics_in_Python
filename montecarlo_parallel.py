@@ -7,15 +7,15 @@ import multiprocessing as mp
 
 class Worker:
     def __init__(self,D,J,H,Nx,steps,warmup_steps,results):
-        self.D = D #dimensions
-        self.J = J #coupling 
-        self.H = H #external magnetic field
-        self.Nx = Nx #number of spins per dimension
-        self.steps = steps #MC steps
-        self.warmup_steps = warmup_steps #warmup steps     
-        self.N = Nx ** D #total number of spins in cubic crystal
-        self.k = 1 #Boltzmann constant
-        self.results=results #results queue
+        self.D = D # number of spatial dimensions
+        self.J = J # coupling strength
+        self.H = H # external magnetic field
+        self.Nx = Nx # number of spins per dimension
+        self.steps = steps # number of MC steps
+        self.warmup_steps = warmup_steps # warmup steps     
+        self.N = Nx ** D # total number of spins in cubic crystal
+        self.k = 1 # Boltzmann constant
+        self.results = results # results queue
         
     def __call__(self,q):
         while True:
@@ -145,6 +145,26 @@ class Worker:
         
    
 def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
+    """
+    Main driver function for the parallel process MC
+    
+    Inputs
+    ------
+    D: int
+        number of spatial dimensions
+    J: int
+        coupling strength
+    H: float
+        external magnetic field strength
+    T: np.array
+        np.array of temperatures to conduct the MC simulation over
+    Nx: int
+        number of spins on each side of the cubic crystal
+    steps: int
+        number of MC steps to take
+    nprocs: int
+        number of parallel processors to use
+    """
     starttime = time.time()
     
     q = mp.JoinableQueue()
