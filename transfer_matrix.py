@@ -4,15 +4,28 @@ import matplotlib.pyplot as plt
 from scipy import linalg
 from scipy import optimize
 
-# This code demonstrates the concept of the transfer matrix method to calculate
-# the transmission and reflection probabilities of a wave passing through
-# different potentials. In this case we will utilize a qunatum particle.
-
-# This code generates the transfer matrix for a series of quantum potentials
 def transfer_matrix(E, V, L, V0):
-    # WARNING! THIS CODE ASSUMES V0 IS THE SAME ON BOTH SIDES OF THE POTENTIAL
-    # WARNING! THIS CODE DOES NOT WORK IF E=V!!!
-    # The program will run only if V and L have the same length!
+    """
+    This code demonstrates the concept of the transfer matrix method to calculate
+    the transmission and reflection probabilities of a wave passing through
+    different potentials. In this case we will utilize a qunatum particle.
+
+    This code generates the transfer matrix for a series of quantum potentials
+    
+    WARNING! THIS CODE ASSUMES V0 IS THE SAME ON BOTH SIDES OF THE POTENTIAL
+    WARNING! THIS CODE DOES NOT WORK IF E=V!!!
+    The program will run only if V and L have the same length!
+    
+    Inputs:
+    E: np.array
+        np.array of Energies to use
+    V: np.array
+        np.array of potential steps to use
+    L: np.array
+        np.array of step lengths
+    V0: float
+        external potential
+    """
     assert len(V) == len(L)
     N = len(L)
     V = np.append(V, V0)  # Append V0 to the end of V for usage in the for loop
@@ -44,9 +57,11 @@ def transfer_matrix(E, V, L, V0):
     # print(abs(D)) #determinant of the transfer matrix should be 1
     return transfer
 
-# This code generates the transmittance T and reflectance R for an incoming
-# wave impinging onto a step potential:
 def barrier_plot():
+    """
+    This code generates the transmittance T and reflectance R for an incoming
+    wave impinging onto a step potential:
+    """
     E = np.linspace(1, 250, 700)  # range of E to be used
     V = np.array([50])  # various potential steps
     L = np.array([1])  # potential step lengths
@@ -112,9 +127,11 @@ def barrier_plot():
 # Quantum Mechanics, Bransden and Joachain Pgs 154-155
 # Intro. to Quantum Mechanics, D. Griffiths Pg 82
 
-# This code generates the transmission and reflection coefficients for a more
-# complicated potential setup
 def resonant_barrier_plot():
+    """
+    This code generates the transmission and reflection coefficients for a more
+    complicated potential setup
+    """
     V = np.array([250, 50, 250])
     L = np.array([0.2, 1, 0.2])
     E = np.linspace(1, 500, 700)
@@ -166,7 +183,9 @@ def resonant_barrier_plot():
 # until it finds fun(x)=0 and return x
 
 def find_bound_states(Emin, Emax, V, L, V0):
-
+    """
+    Find the bound states specified by Emin, Emax, V, L and V0
+    """
     E = np.linspace(Emin, Emax, 700)
     H = np.array([])
     R = np.array([])
