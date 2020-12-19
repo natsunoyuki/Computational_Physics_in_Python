@@ -202,6 +202,9 @@ def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
     return T2, M2
     
 def demo():
+    """
+    This is a demo on how to perform MC simulations using the functions above.
+    """
     T, M = main(D=2, J=1, H=0, T=np.linspace(0.01,10,100), Nx=20, steps=100000, nprocs=2)
     plt.figure(figsize = (15, 5))
     plt.plot(T, M)
