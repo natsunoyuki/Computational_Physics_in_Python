@@ -7,17 +7,17 @@ import multiprocessing as mp
 
 class Worker:
     def __init__(self,D,J,H,Nx,steps,warmup_steps,results):
-        self.D = D # number of spatial dimensions
-        self.J = J # coupling strength
-        self.H = H # external magnetic field
-        self.Nx = Nx # number of spins per dimension
+        self.D = D # number of spatial dimensions. D = 2 or 3 only.
+        self.J = J # coupling strength J
+        self.H = H # external magnetic field H
+        self.Nx = Nx # number of spins per dimension. We assume a cubic lattice
         self.steps = steps # number of MC steps
-        self.warmup_steps = warmup_steps # warmup steps     
-        self.N = Nx ** D # total number of spins in cubic crystal
-        self.k = 1 # Boltzmann constant
+        self.warmup_steps = warmup_steps # number of MC warmup steps     
+        self.N = Nx ** D # total number of spins in cubic lattice
+        self.k = 1 # Boltzmann constant kB
         self.results = results # results queue
         
-    def __call__(self,q):
+    def __call__(self, q):
         while True:
             t = q.get()
             if t is None:
@@ -41,7 +41,7 @@ class Worker:
             
             q.task_done()
             
-    def calc_pflip(self,B):
+    def calc_pflip(self, B):
         if self.D == 2:
             pflip = np.zeros([2, 5])
             Si = 1
@@ -64,7 +64,7 @@ class Worker:
                 Sj = -6  # reset Sj
         return pflip
     
-    def isingmodel(self,spin,pflip):
+    def isingmodel(self, spin, pflip):
         if self.D == 2:
             spin = self.ising2D(spin, pflip)
         elif self.D == 3:
@@ -199,7 +199,7 @@ def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
     M2 = M2[sorted_indices]
     print("Total time elapsed: {:.3f}s".format(time.time()-starttime))
     
-    return T2,M2
+    return T2, M2
     
 #T,M = main(D=3,J=1,H=0,T=np.linspace(0.01,10,100),Nx=20,steps=100000,nprocs=2)
 #plt.plot(T,M)
