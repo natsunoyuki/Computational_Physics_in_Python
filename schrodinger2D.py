@@ -204,7 +204,7 @@ def oneD_to_twoD(Nx, Ny, psi):
 
 def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
                            ymin=-10, ymax=10, Ny=250,
-                           params=[1,1], neigs=8, E0=10, findpsi=True):
+                           params=[1,1], neigs=6, E0=10, findpsi=True):
     """
     Evaluates and plots the 2D QSHO wavefunctions.
     
@@ -301,3 +301,73 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
     eval_wavefunctions(xmin,xmax,Nx,
                        ymin,ymax,Ny,
                        Vfun2D,params,neigs,E0,findpsi=True)
+
+def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
+    """
+    Evaluates and plots the 2D stadium potential wavefunctions.
+    Instead of plotting the wavefunctions as a heatmap, plot them as a 3D surface instead
+    
+    Inputs
+    ------
+    R: float
+        stadium radius
+    L: float
+        stadium length
+    V0: float
+        stadium wall potential
+    neigs: int
+        number of eigenvalues to solve for
+    E0: float
+        eigenvalue to solve for
+    Ny: int
+        number of elements in the y axis
+    """ 
+    ymin = -0.5 * L - R
+    ymax = 0.5 * L + R
+    xmin = -R
+    xmax = R
+    params = [R, L, V0]
+    print("Axis limits:",xmin, xmax, ymin, ymax)
+
+    Nx = int(Ny * 2 * R / (2.0 * R + L))
+    print("Nx, Ny:",Nx, Ny)
+    
+    def Vfun2D(X, Y, params):
+        R = params[0] # stadium radius
+        L = params[1] # stadium length
+        V0 = params[2] # stadium wall potential
+        # stadium potential function
+        Nx = len(X)
+        Ny = len(Y)
+        [x, y] = np.meshgrid(X, Y)
+        F = np.zeros([Ny, Nx])
+
+        for i in range(Nx):
+            for j in range(Ny):
+                if abs(X[i]) == R or abs(Y[j]) == R + 0.5 * L:
+                    F[j, i] = V0
+                if (abs(Y[j]) - 0.5 * L) > 0 and np.sqrt((abs(Y[j]) - 0.5 * L) ** 2 + X[i] ** 2) >= R:
+                    F[j, i] = V0
+        # simplify the 2D matrix to a 1D array for faster processing:
+        V = twoD_to_oneD(Nx, Ny, F)                
+        return V
+    
+    H = schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0,True)
+    evl = H[0] # eigenvalues
+    indices = np.argsort(evl)
+    print("Energy eigenvalues:")
+    for i,j in enumerate(evl[indices]):
+        print("{}: {:.2f}".format(i + 1, np.real(j)))
+    evt = H[1] # eigenvectors
+
+    # unpack the vector into 2 dimensions for plotting:
+    for n in range(evt.shape[1]):
+        psi = evt[:, n]  
+        PSI = oneD_to_twoD(Nx, Ny, psi)
+        PSI = np.abs(PSI)**2
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        X, Y = np.meshgrid(H[2], H[3])
+        ax.plot_surface(X, Y , PSI, cmap='jet')
+        ax.axis('off')
+        plt.show()      
