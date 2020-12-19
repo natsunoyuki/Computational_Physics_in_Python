@@ -1,13 +1,37 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# This function demonstrates explicitly the Runge-Kutta 4 algorithm to perform
+# This script demonstrates explicitly the Runge-Kutta 4 algorithm to perform
 # numerical integration of differential equations.
 # Some well known nonlinear systems are included as demonstrators.
+# For actual industrial/scientific research, specialised libraries should
+# be used instead! 
+# For example scipy.integrate
 
 def ode_steps(ydot_fun, y0, t, params, step_fun):
-    # This function uses a for loop to loop over all time steps for numerical
-    # integration, calling the rk4 function for the actual integration steps
+    """
+    This function uses a for loop to loop over all time steps for numerical
+    integration, calling the rk4 function for the actual integration steps
+    
+    Inputs:
+    -------
+    ydot_fun: function
+        ODE function to integrate
+    y0: np.array
+        np.array of initial values 
+    t: np.array
+        np.array of time values
+    params: np.array
+        np.array of ydot_fun parameters
+    step_fun: function
+        discretised step function to use for numerical integration
+        
+    Returns:
+    --------
+    Y: np.array
+        np.array of numerically integrated results 
+    """
+
     Y = np.zeros([len(t), len(y0)])  
     Y[0, :] = y0
     
@@ -17,7 +41,27 @@ def ode_steps(ydot_fun, y0, t, params, step_fun):
     return Y
 
 def rk4(t0, t1, y0, xdot_fun, params):
-    # This function contains the actual Runge-Kutta 4th order integration steps
+    """
+    This function contains the actual Runge-Kutta 4th order integration steps
+    
+    Inputs:
+    -------
+    t0: float
+        time at start of time step
+    t1: float
+        time at end of time step
+    y0: np.array
+        y values at the start of the time step
+    xdot_fun: function
+        ODE function to integrate numerically
+    params: np.array
+        np.array of parameters of xdot_fun
+    
+    Returns:
+    --------
+    y1: np.array
+        y vaues at the end of the time step
+    """
     dt = t1 - t0
     k1 = (dt) * xdot_fun(y0, t0, params)
     k2 = (dt) * xdot_fun(y0 + 0.5 * k1, t0 + (dt) * 0.5, params)
@@ -27,7 +71,18 @@ def rk4(t0, t1, y0, xdot_fun, params):
     return y1
 
 def plot(Y, x_ax, y_ax):
-    # Plot the numerical integration results
+    """
+    Plot the numerical integration results
+    
+    Inputs
+    ------
+    Y: np.array
+        np.array of values to plot
+    x_ax: 0, 1 or 2
+        which axis to plot on the graph x axis
+    y_ax: 0, 1 or 2
+        which axis to plot on the graph y axis
+    """
     plt.figure(figsize=(8, 8))
     plt.plot(Y[:, x_ax], Y[:, y_ax])
     
@@ -51,7 +106,16 @@ def plot(Y, x_ax, y_ax):
     plt.show()    
 
 def lorentz_plot_demo(x_ax = 0, y_ax = 2):
-    # Lorenz, E. N. (1963) Journal of the Atmospheric Sciences. 20 (2): 130–141
+    """
+    Lorenz, E. N. (1963) Journal of the Atmospheric Sciences. 20 (2): 130–141
+    
+    Inputs
+    ------
+    x_ax: 0, 1 or 2
+        which axis to plot on the graph x axis
+    y_ax: 0, 1 or 2
+        which axis to plot on the graph y axis
+    """
     x0 = np.array([1, 2, 3])
     t = np.arange(0, 100, 0.001)
     s = 10.0
@@ -72,7 +136,16 @@ def lorentz_plot_demo(x_ax = 0, y_ax = 2):
     plot(Y, x_ax, y_ax)
 
 def rossler_plot_demo(x_ax = 0, y_ax = 1):
-    # Rossler, O. E. (1976) Physics Letters, 57A (5): 397–398
+    """
+    Rossler, O. E. (1976) Physics Letters, 57A (5): 397–398    
+    
+    Inputs
+    ------
+    x_ax: 0, 1 or 2
+        which axis to plot on the graph x axis
+    y_ax: 0, 1 or 2
+        which axis to plot on the graph y axis
+    """
     x0 = np.array([1, 2, 3])
     t = np.arange(0, 1000, 0.01)
     a = 0.1
@@ -96,8 +169,17 @@ def rossler_plot_demo(x_ax = 0, y_ax = 1):
     plot(Y, x_ax, y_ax)
     
 def julian_plot_demo(x_ax = 1, y_ax = 2):
-    # Julian, B. R. (1994) Volcanic tremor: Nonlinear excitation by fluid flow, 
-    # J. geophys. Res., 99(B6), 11859–11877
+    """
+    Julian, B. R. (1994) Volcanic tremor: Nonlinear excitation by fluid flow, 
+    J. geophys. Res., 99(B6), 11859–11877
+    
+    Inputs
+    ------
+    x_ax: 0, 1 or 2
+        which axis to plot on the graph x axis
+    y_ax: 0, 1 or 2
+        which axis to plot on the graph y axis
+    """
     x0 = np.array([1, 2, 3])
     t = np.arange(0, 100, 0.001)
     
