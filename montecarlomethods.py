@@ -4,6 +4,18 @@ from scipy import random
 import time
 random.seed() #seed the RNG.
 
+# FUNCTION CALLS TO TEST THE FUNCTION:
+
+# 2D ising metropolis algorithm
+# [T2,M2]=ising_metropolis_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000)
+
+# 2D ising heatbath algorithm
+# [TH2,MH2]=ising_heatbath_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000)
+
+# ND ising metropolis algorithm
+# [TX,MX]=ising_metropolis_ND(2,1,0,linspace(0.01,5,50),20,100000,100000)
+
+
 def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
     """
     This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
@@ -628,9 +640,3 @@ def ising3D(Nx,Ny,Nz,spin,pflip):
         spin[r] = -spin[r] 
     return spin    
 #################################################################################################
-#FUNCTION CALLS TO TEST THE FUNCTION:
-"""
-[T2,M2]=ising_metropolis_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
-[TH2,MH2]=ising_heatbath_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
-[TX,MX]=ising_metropolis_ND(2,1,0,linspace(0.01,5,50),20,100000,100000);
-"""
