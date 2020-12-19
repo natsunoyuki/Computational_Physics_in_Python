@@ -102,7 +102,8 @@ def eval_wavefunctions(xmin, xmax, Nx,
                        Vfun, params, neigs, E0, findpsi):
  
     """
-    Evaluates and plots the 2 dimensional Schrodinger equation numerically for some potential function Vfun
+    Evaluates and plots the 2 dimensional Schrodinger equation numerically for some potential function Vfun.
+    The 2D wavefunctions (actually, the probabilities!) are plotted as a heatmap instead of as an actual plot.
     
     Inputs
     ------
