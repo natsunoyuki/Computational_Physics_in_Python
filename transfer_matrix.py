@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import sqrt
+from numpy.lib.scimath import sqrt
 import matplotlib.pyplot as plt
 from scipy import linalg
 from scipy import optimize
@@ -9,22 +9,27 @@ def transfer_matrix(E, V, L, V0):
     This code demonstrates the concept of the transfer matrix method to calculate
     the transmission and reflection probabilities of a wave passing through
     different potentials. In this case we will utilize a qunatum particle.
-
     This code generates the transfer matrix for a series of quantum potentials
     
     WARNING! THIS CODE ASSUMES V0 IS THE SAME ON BOTH SIDES OF THE POTENTIAL
-    WARNING! THIS CODE DOES NOT WORK IF E=V!!!
+    WARNING! THIS CODE DOES NOT WORK IF E = V!!!
     The program will run only if V and L have the same length!
     
-    Inputs:
-    E: np.array
-        np.array of Energies to use
+    Inputs
+    ------
+    E: float
+        particle energy
     V: np.array
-        np.array of potential steps to use
+        np.array of potential energy steps
     L: np.array
         np.array of step lengths
     V0: float
         external potential
+        
+    Returns
+    -------
+    transfer: np.array
+        transfer matrix
     """
     assert len(V) == len(L)
     N = len(L)
@@ -32,10 +37,10 @@ def transfer_matrix(E, V, L, V0):
     # calculate the array of k values:
     k = sqrt(E - V)  # note that k can be complex
               
-    # calculate the first potential jump from V0 to V(0) i.e. from outside
+    # calculate the first potential jump from V0 to V[0] i.e. from outside
     # to the first potential step using the combined matrix solved by hand:
     transfer = 0.5 * np.array([[1.0 + k[-1] / k[0], 1 - k[-1] / k[0]], [1 - k[-1] / k[0], 1 + k[-1] / k[0]]])
-    # k[-1] is the last element in array k which is sqrt(E-V0) i.e. the value
+    # k[-1] is the last element in array k which is sqrt(E - V0) i.e. the value
     # of k in the outside region
 
     # Loop over the rest of the N steps starting with a translation 
@@ -81,7 +86,7 @@ def barrier_plot():
     n = np.array([1, 2, 3, 4])
     H = (n ** 2) * (np.pi ** 2) + 50
 
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize=(15, 5))
     plt.semilogy(E, T, 'r')
     plt.semilogy(E, R, 'c')
     plt.vlines(H, 1e-7, 1)
@@ -144,7 +149,7 @@ def resonant_barrier_plot():
         R[i] = abs(M[1, 0] / M[1, 1]) ** 2  # calculate Reflection
         T[i] = abs(linalg.det(M) / M[1, 1]) ** 2  # calculate Transmission
 
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize=(15, 5))
     plt.semilogy(E, T, 'r')
     plt.semilogy(E, R, 'c')
     plt.legend(["Transmission", "Reflection"])
@@ -185,14 +190,32 @@ def resonant_barrier_plot():
 def find_bound_states(Emin, Emax, V, L, V0):
     """
     Find the bound states specified by Emin, Emax, V, L and V0
+    
+    Inputs
+    ------
+    Emin: float
+        minimum energy
+    Emax: float
+        maximum energy
+    V: np.array
+        np.array of potential energies
+    L: np.array
+        np.array of the step lengths
+    V0: float
+        external potential energy value
+    
+    Returns
+    -------
+    R: np.array
+        energies of the bound states
     """
     E = np.linspace(Emin, Emax, 700)
     H = np.array([])
     R = np.array([])
 
     def M22(E, V, L, V0):
-            # this function returns the last element of the transfer matrix
-            # i.e. M[1,1] in 0-index or M(2,2) in standard index
+        # this function returns the last element of the transfer matrix
+        # i.e. M[1,1] in 0-index or M(2,2) in standard index
         Q = transfer_matrix(E, V, L, V0)[1, 1]
         return Q  # Q = M[1,1] i.e. Q is a float and not a matrix
     
@@ -243,7 +266,7 @@ def resonant_barrier_plot2():
     Q = find_bound_states(50, 250, np.array([50]), np.array([1]), 250)
     print('The bound states energies are: {}'.format(Q))
     
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize=(15, 5))
     plt.semilogy(E, T, 'r')
     plt.semilogy(E, R, 'c')
     plt.vlines(Q, 1e-13, 1)
