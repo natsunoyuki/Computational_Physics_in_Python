@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import random
 import time
 
 # FUNCTION CALLS TO TEST THE FUNCTION:
