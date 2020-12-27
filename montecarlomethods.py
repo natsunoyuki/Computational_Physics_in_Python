@@ -13,6 +13,9 @@ import time
 # ND ising metropolis algorithm
 # [TX,MX]=ising_metropolis_ND(2,1,0,np.linspace(0.01,5,50),20,100000,100000)
 
+# This script has been superseded with the parallel process version:
+# https://github.com/natsunoyuki/Computational_Physics_in_Python/blob/master/montecarlo_parallel.py
+
 def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
     """
     This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
