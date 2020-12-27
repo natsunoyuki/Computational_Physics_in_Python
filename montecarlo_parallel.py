@@ -18,6 +18,12 @@ class Worker:
         self.results = results # results queue
         
     def __call__(self, q):
+        """
+        Inputs
+        ------
+        q: mp.JoinableQueue
+            JoinableQueue of temperatures
+        """
         while True:
             t = q.get()
             if t is None:
@@ -42,6 +48,19 @@ class Worker:
             q.task_done()
             
     def calc_pflip(self, B):
+        """
+        Calculates the probability of spin flip
+
+        Inputs
+        ------
+        B: float
+            1/kT
+
+        Returns
+        -------
+        pflip: float
+            probability of spin flip
+        """
         if self.D == 2:
             pflip = np.zeros([2, 5])
             Si = 1
@@ -65,6 +84,16 @@ class Worker:
         return pflip
     
     def isingmodel(self, spin, pflip):
+        """
+        Wrapper function for the actual 2D or 3D Ising model.
+
+        Inputs
+        ------
+        spin: np.array
+            np.array of spins
+        pflip: float
+            Probability of spin flip
+        """
         if self.D == 2:
             spin = self.ising2D(spin, pflip)
         elif self.D == 3:
@@ -72,6 +101,14 @@ class Worker:
         return spin
     
     def ising2D(self, spin, pflip):
+        """
+        Inputs
+        ------
+        spin: np.array
+            np.array of spins
+        pflip: float
+            Probability of spin flip
+        """      
         N = self.Nx ** self.D
         Nx = self.Nx
         Ny = self.Nx
@@ -104,6 +141,14 @@ class Worker:
         return spin
     
     def ising3D(self, spin, pflip):
+        """
+        Inputs
+        ------
+        spin: np.array
+            np.array of spins
+        pflip: float
+            Probability of spin flip
+        """
         N = self.N
         Nx = self.Nx
         Ny = self.Nx
@@ -204,6 +249,7 @@ def main(D=2,J=1,H=0,T=np.linspace(0.01,5,50),Nx=20,steps=100000,nprocs=2):
 def demo():
     """
     This is a demo on how to perform MC simulations using the functions above.
+    By default, the demo demonstrates the functions using a 2D lattice.
     """
     T, M = main(D=2, J=1, H=0, T=np.linspace(0.01,10,100), Nx=20, steps=100000, nprocs=2)
     plt.figure(figsize = (15, 5))
