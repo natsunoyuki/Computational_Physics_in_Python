@@ -132,7 +132,7 @@ def eval_wavefunctions(xmin, xmax, Nx,
         If False, only the eigen energies will be found.
     """ 
         
-    H = schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun,params,neigs,E0,findpsi)
+    H = schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun, params, neigs, E0, findpsi)
     evl = H[0] # eigenvalues
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
@@ -299,9 +299,9 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
         V = twoD_to_oneD(Nx, Ny, F)                
         return V
  
-    eval_wavefunctions(xmin,xmax,Nx,
-                       ymin,ymax,Ny,
-                       Vfun2D,params,neigs,E0,findpsi=True)
+    eval_wavefunctions(xmin, xmax, Nx,
+                       ymin, ymax, Ny,
+                       Vfun2D, params, neigs, E0, findpsi=True)
 
 def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
     """
@@ -353,7 +353,7 @@ def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
         V = twoD_to_oneD(Nx, Ny, F)                
         return V
     
-    H = schrodinger2D(xmin,xmax,Nx,ymin,ymax,Ny,Vfun2D,params,neigs,E0,True)
+    H = schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0, True)
     evl = H[0] # eigenvalues
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
