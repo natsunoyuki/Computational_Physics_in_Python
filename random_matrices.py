@@ -1,14 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import linalg
 np.random.seed()
 
 # This script explores several properties of random numbers and random matrices
 
-def exp_sampler(lambd=1):
+def exp_dist(lambd = 1):
     """
     This function samples from the exponential distribution using only the
     random.random() random number generator
+
+    Inputs
+    ------
+    lambd: float
+        exponential distribution parameter lambda
+
+    Returns
+    -------
+    x: float
+        sampled point from the exponential distribution
     """
     # note that random.random range: 0 <= r <= 1
     x = -1.0 / lambd * np.log(np.random.random() / lambd)
@@ -16,39 +25,67 @@ def exp_sampler(lambd=1):
     # correctly from the exponential distribution
     return x
 
-def exp_hist(lambd=1, nruns=10000, nbins=100):
+def exp_dist_histogram(lambd = 1, n_iter = 10000, n_bins = 100):
     """
     This function generates a histogram of multiple samples from the exponential
     distribution and plots the analytical solution on with the numeric solution
+
+    Inputs
+    ------
+    lambd: float
+        exponential distribution parameter lambda
+    n_iter: int
+        number of iterations to complete
+    n_bins: int
+        number of bins to use in the histogram
+
+    Returns
+    -------
+    x: float
+        sampled point from the exponential distribution    
     """
-    result = np.linspace(1, nruns, nruns)  # empty array of length nruns for results
-    for i in range(nruns):
-        result[i] = exp_sampler(lambd)
-        
+    result = np.linspace(1, n_iter, n_iter) 
+    for i in range(n_iter):
+        result[i] = exp_dist(lambd)
+    
     # generate line plot of p(x)
     x = np.linspace(0, max(result), 1000)
     y = lambd * np.exp(-lambd * x)
     
-    plt.figure(figsize=(10,5))
-    plt.hist(result, nbins, facecolor='b', density=1)
+    plt.figure(figsize=(15, 5))
+    plt.hist(result, n_bins, facecolor='b', density=1)
     plt.plot(x, y, 'r')
     plt.show()
 
-def expmu_hist(lambd=1, nruns=10000, nbins=100):
+def expmu_histogram(lambd = 1, n_iter = 10000, n_bins = 100):
     """
     This function generates multple subplots of histograms of the mean of the
     independent random variables sampled from the exponenential distribution.
     The histograms are plotted together with the analytical solution
     to the central limit theorem
+
+    Inputs
+    ------
+    lambd: float
+        exponential distribution parameter lambda
+    n_iter: int
+        number of iterations to complete
+    n_bins: int
+        number of bins to use in the histogram
+
+    Returns
+    -------
+    x: float
+        sampled point from the exponential distribution 
     """
     # number of samples:
     N = np.array([5, 10, 20])
     # create a vector to hold the results
-    result = np.zeros([len(N), nruns])
-    for a in range(nruns):
+    result = np.zeros([len(N), n_iter])
+    for a in range(n_iter):
         for b in range(len(N)):
             for c in range(N[b]):
-                result[b][a] = result[b][a] + exp_sampler(lambd)
+                result[b][a] = result[b][a] + exp_dist(lambd)
             result[b][a] = result[b][a] / float(N[b])  # prevent integer division
             
     # Plotting of the analytical result:
@@ -57,12 +94,12 @@ def expmu_hist(lambd=1, nruns=10000, nbins=100):
     mu = lambd ** -1  # analytical mean
     p = np.zeros([len(N), len(x)])
     
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(15, 5))
     for i in range(len(N)):
         sig2 = 1.0 / (N[i] * lambd ** 2)  # analytical variance which depends on N
         p[i, :] = ((2 * np.pi * sig2) ** -0.5) * np.exp(-(x - mu) ** 2 / 2.0 * sig2 ** -1)
         plt.subplot(len(N), 1, i + 1)
-        plt.hist(result[i, :], nbins, density=1)
+        plt.hist(result[i, :], n_bins, density=1)
         plt.plot(x, p[i, :])
         
     plt.show()
@@ -70,21 +107,41 @@ def expmu_hist(lambd=1, nruns=10000, nbins=100):
     # Gaussian distribution with corresponding mean and variance. This is the
     # essence of the central limit theorem.
     
-def goe_eigs(N=10):
+def goe_eigs(N = 10):
     """
     This function generates the eigenvalues from the gaussian orthogonal ensemble
-    random matrices:
+    random matrices
+
+    Inputs
+    ------
+    N: int
+        size of random matrix
+    
+    Returns
+    -------
+    D: np.array
+        eigenvalues
     """
     A = np.random.randn(N, N)
     B = 2 ** -0.5 * (A + A.T)
-    D = linalg.eigvals(B)  
+    D = np.linalg.eigvals(B)  
     D = np.real(D)
     return D
 
-def bernoulli_eigs(N=10):
+def bernoulli_eigs(N = 10):
     """
     This function generates the eigenvalues from the symmetric bernoulli ensemble
-    random matrices:
+    random matrices
+
+    Inputs
+    ------
+    N: int
+        size of random matrix
+    
+    Returns
+    -------
+    D: np.array
+        eigenvalues    
     """
     B = np.zeros([N, N])
     # The following fills B[i][j] and B[j][i] with either 1 or -1 with
@@ -99,27 +156,48 @@ def bernoulli_eigs(N=10):
                 else:
                     B[i][j] = -1
                     B[j][i] = -1
-    D = linalg.eigvals(B)  # D = eigenvalues vector
+    D = np.linalg.eigvals(B)  # D = eigenvalues vector
     D = np.real(D)
     return D
 
-def gue_eigs(N=10):
+def gue_eigs(N = 10):
     """
     This function generates the eigenvalues from the gaussian unitary ensemble
-    random matrices:
+    random matrices
+
+    Inputs
+    ------
+    N: int
+        size of random matrix
+    
+    Returns
+    -------
+    D: np.array
+        eigenvalues
     """
     A = np.random.randn(N, N) + 1j * np.random.randn(N, N) 
     B = (2 ** -1) * (A + np.conj(A.T)) 
-    D = linalg.eigvals(B)  
+    D = np.linalg.eigvals(B)  
     D = np.real(D)
     return D
 
-def random_matrix_hist(N=10, fun=goe_eigs, nruns=1000, nbins=50):
+def random_matrix_histogram(N = 10, fun = goe_eigs, n_iter = 1000, n_bins = 50):
     """
     This function generates the histogram for an arbitrary random matrix ensemble
+
+    Inputs
+    ------
+    N: int
+        size of the random number matrix
+    fun: object
+        random matrix function
+    n_iter: int
+        number of iterations to execute
+    n_bins: int
+        number of bins to use in the histogram   
     """
-    b = np.zeros([nruns, N]) 
-    for i in range(nruns):
+    b = np.zeros([n_iter, N]) 
+    for i in range(n_iter):
         b[i, :] = fun(N)  # output vector is placed into one of the rows of the result matrix
     bnorm = b * N ** -0.5  # obtain the normalised eigenvalues
     # Before passing this matrix of eigenvalues into hist(), we need to
@@ -137,9 +215,8 @@ def random_matrix_hist(N=10, fun=goe_eigs, nruns=1000, nbins=50):
     # for some reason hist does not accept row vectors as input, hence the need
     # for column vectors in the input of hist (at least on my computer)
     
-    # PLOTTING:
     plt.subplot(2, 1, 1)  # two plots - Wigner's Semicircle and Surmise
-    plt.hist(breshape, nbins, density=1)
+    plt.hist(breshape, n_bins, density=1)
     x = np.linspace(-2, 2, 1000)
     pw = 1.0 * (2 * np.pi) ** -1 * (4 - x ** 2) ** 0.5  # Wigner Semi Circle Law
     plt.plot(x, pw, 'r')
@@ -150,7 +227,7 @@ def random_matrix_hist(N=10, fun=goe_eigs, nruns=1000, nbins=50):
     # Sebastian Schierenberg, Falk Bruckmann, and Tilo Wettig
     # fw=32*pi**-2*delta**2*exp(-4*pi**-1*delta**2)
     plt.subplot(2, 1, 2)
-    plt.hist(DELTA, nbins, density=1)
+    plt.hist(DELTA, n_bins, density=1)
     plt.plot(delta, fw, 'r')
     plt.ylim([0, 1])
     plt.xlim([0, 5])
