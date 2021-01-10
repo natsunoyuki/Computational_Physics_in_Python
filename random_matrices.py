@@ -59,7 +59,7 @@ def exp_dist_histogram(lambd = 1, n_iter = 10000, n_bins = 100):
 
 def expmu_histogram(lambd = 1, n_iter = 10000, n_bins = 100):
     """
-    This function generates multple subplots of histograms of the mean of the
+    This function generates multiple subplots of histograms of the mean of the
     independent random variables sampled from the exponenential distribution.
     The histograms are plotted together with the analytical solution
     to the central limit theorem
