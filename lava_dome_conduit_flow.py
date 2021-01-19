@@ -9,7 +9,7 @@ import time
 # Journal of Volcanology and Geothermal Research, 178, 46-57, 2008.
 # http://www.eri.u-tokyo.ac.jp/people/ichihara/vp2008plan/NakanishiKoyaguchi2008.pdf
 
-def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star = 1, dt = None, t_end = 30):
+def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star = 1, dt = None, t_end = None):
     """
     Inputs
     ------
@@ -18,13 +18,13 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
     mu: float
         DDE parameter
     y0: np.array
-        initial conditions [P, Q]
+        initial conditions for [P, Q]
     t_star: float
         time parameter. Interesting values to use: 1, 0.2
     dt: np.float
-        time step size. If set to None, dt will be calculated automatically using dt = tstar / 20000
+        time step size. If set to None, dt will be calculated automatically using dt = t_star / 20000
     t_end: float
-        end time
+        end time. If set to None, t_end will be set automatically to 30
 
     Returns
     -------
@@ -62,6 +62,8 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
 
     if dt is None:
         dt = t_star / 20000 # set time step size
+    if t_end is None:
+        t_end = 30
 
     delayindex = int(t_star / dt) # set the delay (history) index
 
