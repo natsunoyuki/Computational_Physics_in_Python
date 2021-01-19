@@ -17,7 +17,7 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
     y0: np.array
         initial conditions for [P, Q]
     t_star: float
-        time parameter. Interesting values to use: 1, 0.2
+        time parameter during which a fluid particle ascends in the magma chamber
     dt: np.float
         time step size. If set to None, dt will be calculated automatically using dt = t_star / 20000
     t_end: float
