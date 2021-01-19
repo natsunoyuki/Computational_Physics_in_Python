@@ -1,8 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-
-# This is a code to simulate the time forward modelling of a delay difference equation.
 
 # This code solves the delay difference equations proposed by:
 # M. Nakanishi, T. Koyaguchi, "A stability analysis of a conduit flow model for lave dome eruptions",
@@ -14,9 +11,9 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
     Inputs
     ------
     Qin: float
-        DDE parameter
+        DDE parameter for input flux
     mu: float
-        DDE parameter
+        DDE parameter for magma viscosity
     y0: np.array
         initial conditions for [P, Q]
     t_star: float
@@ -34,23 +31,21 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
     # The delay difference equations proposed by Nakanashi and Koyaguchi come in 2 different forms 
     # depending on the current system conditions. 
 
-    # First set of DDE equations, when np.trapz(Q, T) <= 1 (equation (5) in the paper)
-    # Equations (8), (10)~(12) in the paper
+    # First set of DDE equations, when np.trapz(Q, T) <= 1
     def less_than_one(x, t, delayx):
         ydot = np.zeros(len(x))
         ydot[0] = Qin - x[1] # pressure P
         ydot[1] = x[1] / x[0] * (Qin - x[1] + (mu - 1) * (x[1] - delayx) * x[1]) # flux Q
         return ydot
 
-    # Second set of DDE equations, when np.trapz(Q, T) > 1 (equation (5) in the paper)
-    # Equations (8), (10)~(12) in the paper
+    # Second set of DDE equations, when np.trapz(Q, T) > 1
     def more_than_one(x, t, delayx):
         ydot = np.zeros(len(x))
         ydot[0] = Qin - x[1] # pressure P
         ydot[1] = Qin - x[1] # flux Q
         return ydot
     
-    # Runge-Kutta-4 algorithm for numerical integration of initial value problems
+    # Runge-Kutta-4 algorithm
     def rk4(t0, t1, y0, ydot_fun, params):
         dt = t1 - t0
         k1 = (dt) * ydot_fun(y0, t0, params)
@@ -60,21 +55,17 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
         y1 = y0 + (k1 + 2 * k2 + 2 * k3 + k4) / 6.0
         return y1
     
-    starttime = time.time() #log start time
-
     if dt is None:
         dt = t_star / 20000 # set time step size
     if t_end is None:
-        t_end = 30 # set the end time
+        t_end = 30
 
-    # set the number of delay difference histories to use
-    delayindex = int(t_star / dt) 
+    delayindex = int(t_star / dt) # set the delay (history) index
 
     # length of time of the simulation
     t = np.arange(-t_star, t_end + dt, dt) 
-
-    # set initial conditions for the simulation
     Y = np.zeros([len(t), len(y0)])
+    # set initial conditions for the simulation
     Y[0, :] = y0 
     
     # Create delay difference history (history has length of delayindex)
@@ -83,7 +74,7 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
         y0[1] = y0[1] - 1.0 / delayindex # flux Q history
         Y[i+1, :] = y0
     
-    # Actual RK4 loop to solve the delay differential equation with the delay difference history
+    # Actual RK4 loop to solve the delay differential equation
     for i in range(len(t) - 1 - delayindex):
         params = Y[i, 1]
         T = t[i:i + delayindex + 1]
@@ -95,8 +86,6 @@ def lava_dome_conduit_flow(Qin = 0.8, mu = 10, y0 = np.array([1.5, 1.5]), t_star
         else:
             # if np.trapz(Q, T) <= 1, the DDE equation to integrate is less_than_one
             Y[i + 1 + delayindex, :] = rk4(t[i+delayindex],t[i+1+delayindex],Y[i+delayindex,:], less_than_one, params)
-
-    print("Time elapsed: {:.2f}s".format(time.time()-starttime)) 
 
     # don't forget to remove the (artificial) history from the data!!!
     return t[delayindex:], Y[delayindex:] 
