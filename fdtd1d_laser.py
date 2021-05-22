@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Usage:
-# fdtd = fdtd1d()
+# fdtd = fdtd1d_laser()
 # fdtd.run()
 # fdtd.plot()
 
-class fdtd1d(object):
+class fdtd1d_laser(object):
     # This code serves to give a demonstration of using the FDTD method to 
     # simulate a 1-dimensional laser with 1 port on the right side, and a 
     # perfectly reflecting mirror on the left side of the cavity.
@@ -98,8 +98,8 @@ class fdtd1d(object):
         self.Et = np.zeros(self.T) # time based field measured at sample
         self.sample = die2 - 1 # sampling location along the x axis, 0 indexing
         
-        self.x = np.arange(0, Nx, 1)
-        self.Dx = np.arange(1, Nx, 1)        
+        self.x = np.arange(0, X, 1)
+        self.Dx = np.arange(1, X, 1)        
         
     def get_fields(self):
         return self.Ez, self.Hy
