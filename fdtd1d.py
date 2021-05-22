@@ -7,7 +7,7 @@ import tqdm
 # fdtd.run()
 # fdtd.plot()
 
-class fdtd1d_laser(object):
+class fdtd1d(object):
     def __init__(self, Nx = 201, dx = 1e-3, c = 1, source = 100, sample = 100, n_iter = 150):      
         # Grid properties:
         # 1. Number of grid cells
@@ -48,8 +48,8 @@ class fdtd1d_laser(object):
         self.E_t = []
         
         # Physical grid for plotting
-        self.x = np.arange(0, X, 1)
-        self.Dx = np.arange(1, X, 1)
+        self.x = np.arange(0, Nx, 1)
+        self.Dx = np.arange(1, Nx, 1)
         
         # Total number of time steps to run
         self.n_iter = 150
@@ -87,12 +87,15 @@ class fdtd1d_laser(object):
     def plot(self):
         # plot the E_y and H_z fields in space
         plt.figure(figsize = (10, 5))
+        plt.subplot(2, 1, 1)
         plt.plot(self.x, self.E_y)
+        plt.ylabel("E_y")
+        plt.grid(True)
+        plt.subplot(2, 1, 2)
         plt.plot(self.Dx, self.H_z)
-        plt.ylabel('E_y, H_y')
+        plt.ylabel("H_x")
         plt.grid('on')
         plt.xlabel("x")
-        plt.legend(["E_y", "H_z"])
         plt.show()
         
     def plot_et(self, t0 = None, t1 = None):
