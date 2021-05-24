@@ -8,7 +8,7 @@ import tqdm
 # fdtd.plot()
 
 class fdtd1d(object):
-    def __init__(self, Nx = 201, dx = 1e-3, c = 1, source = 100, sample = 100, n_iter = 150):      
+    def __init__(self, Nx = 201, dx = 1e-3, c = 1, source = 100, sample = 100):
         # Grid properties:
         # 1. Number of grid cells
         self.Nx = Nx
@@ -33,9 +33,6 @@ class fdtd1d(object):
         self.E_y = np.zeros(Nx)
         # 2. Magnetic field grid
         self.H_z = np.zeros(Nx - 1) 
-        # 3. Physical grid (for visualization)
-        self.x = np.arange(0, Nx, 1)
-        self.Dx = np.arange(1, Nx, 1)
 
         # Mur absorbing boundary conditions (ABC)
         # ABC for right side 
@@ -49,12 +46,9 @@ class fdtd1d(object):
         
         # Physical grid for plotting
         self.x = np.arange(0, Nx, 1)
-        self.Dx = np.arange(1, Nx, 1)
-        
-        # Total number of time steps to run
-        self.n_iter = 150
+        self.Dx = np.arange(0.5, Nx-0.5, 1)
 
-    def run(self):
+    def run(self, n_iter = 150):
         # Main FDTD Loops
         dt = self.dt
         dx = self.dx
@@ -63,7 +57,7 @@ class fdtd1d(object):
         sig = self.sig
         source = self.source
         
-        for n in tqdm.trange(self.n_iter):
+        for n in tqdm.trange(n_iter):
             # Update magnetic field
             self.H_z = self.H_z - dt / dx * (self.E_y[1:] - self.E_y[:-1])     
     

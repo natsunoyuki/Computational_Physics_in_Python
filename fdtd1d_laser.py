@@ -13,7 +13,7 @@ class fdtd1d_laser(object):
     # On the left side of the integration grid a 1st order Mur boundary is
     # emplaced as the absorbing boundary conditions. Therefore the laser is
     # restricted to output only on the right side of the cavity.
-    def __init__(self, X = 500, dx = 1e-4, T = 100000, source = 99,
+    def __init__(self, X = 500, dx = 1e-4, source = 99,
                  c = 1.0, frequency = 1000, 
                  gperp = 35, ka = 1000, 
                  die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0,
@@ -21,7 +21,6 @@ class fdtd1d_laser(object):
         """FDTD input arguments in CGS units:
         X: number of grid cells in the x direction
         dx: grid cell size
-        T: number of time steps to use in the simulation
         source: location of power source in the laser
         c: speed of light
         frequency: frequency of the power source
@@ -39,7 +38,6 @@ class fdtd1d_laser(object):
         # Physical simulation parameters
         self.X = X # number of spatial grid cells in the x direction
         self.dx = dx # spatial grid cell size
-        self.T = T # number of time steps tp use in the integration
         self.source = source # power source location in cells
         self.c = c # speed of light
         
@@ -95,7 +93,7 @@ class fdtd1d_laser(object):
         
         # Prepare vector to hold electric field at a particular location over 
         # the entire time frame of the FDTD loop.
-        self.Et = np.zeros(self.T) # time based field measured at sample
+        self.Et = [] # time based field measured at sample
         self.sample = die2 - 1 # sampling location along the x axis, 0 indexing
         
         self.x = np.arange(0, X, 1)
@@ -107,10 +105,10 @@ class fdtd1d_laser(object):
     def get_et(self):
         return self.Et
 
-    def run(self):
+    def run(self, T = 10000):
         print("Running FDTD...")
         # Main FDTD Loops
-        for n in range(self.T):
+        for n in range(T):
             # Update the polarization vector
             self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.Ez[self.die1:self.die2] * self.D[self.die1:self.die2])
             self.Pold = self.Place.copy() # DO NOT SIMPLY USE Pold=Place! Use .copy() in python!
@@ -134,10 +132,10 @@ class fdtd1d_laser(object):
             self.Hy = self.Hy - self.dt / self.dx * np.diff(self.Ez)
             
             # Save the sample data to a vector for export
-            self.Et[n] = self.Ez[self.sample]
+            self.Et.append(self.Ez[self.sample])
         
-            if np.remainder(n, int(self.T / 10)) == 0:
-                print('Percent Complete: {:.0f}%'.format(n / self.T * 100))
+            if np.remainder(n, int(T / 10)) == 0:
+                print('Percent Complete: {:.0f}%'.format(n / T * 100))
                 
         print("Run complete!")
 
