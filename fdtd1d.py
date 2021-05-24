@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
+from matplotlib.animation import FuncAnimation
 
 # Usage:
 # fdtd = fdtd1d()
@@ -8,7 +9,7 @@ import tqdm
 # fdtd.plot()
 
 class fdtd1d(object):
-    def __init__(self, Nx = 201, dx = 1e-3, c = 1, source = 100, sample = 100):
+    def __init__(self, Nx = 201, dx = 1e-3, c = 1, source = 100):
         # Grid properties:
         # 1. Number of grid cells
         self.Nx = Nx
@@ -40,8 +41,7 @@ class fdtd1d(object):
         # ABC for left side
         self.E_y_l = 0
 
-        # Record the time dependent electric field at sample.
-        self.sample = sample
+        # Record the time dependent electric field.
         self.E_t = []
         
         # Physical grid for plotting
@@ -53,7 +53,6 @@ class fdtd1d(object):
         dt = self.dt
         dx = self.dx
         c = self.c
-        sample = self.sample
         sig = self.sig
         source = self.source
         
@@ -76,7 +75,7 @@ class fdtd1d(object):
             self.E_y[0] = self.E_y_l + (c * dt - dx) / (c * dt + dx) * (self.E_y[1] - self.E_y[0])
             self.E_y_l = self.E_y[1]
             
-            self.E_t.append(self.E_y[sample])
+            self.E_t.append(self.E_y.copy())
         
     def plot(self):
         # plot the E_y and H_z fields in space
@@ -92,17 +91,23 @@ class fdtd1d(object):
         plt.xlabel("x")
         plt.show()
         
-    def plot_et(self, t0 = None, t1 = None):
-        # plot the time dependent electric field solution Et
-        if t0 is None:
-            t0 = 0
-        if t1 is None:
-            t1 = len(self.E_t)
-        if t1 > len(self.E_t):
-            t1 = len(self.E_t)
-        plt.figure(figsize = (10, 5))
-        plt.plot(self.E_t[t0:t1], 'red')
-        plt.xlabel("t")
-        plt.ylabel("Ez(t)")
-        plt.grid('on')
-        plt.show()
+    def animate_et(self, file_dir = "fdtd_1d_animation.gif", N = 500):
+        # animate self.Et as a .gif file.
+        # N: number of total steps to save as .gif animation.
+        Et = self.E_t[-N:]
+        
+        fig, ax = plt.subplots(figsize = (10, 5))
+        ax.set(xlim = [-10, 210], ylim = [-1, 1])
+        line = ax.plot(range(len(Et[0])), Et[0], color = "r", linewidth = 2)[0]
+        ax.set_xlabel("x")
+        ax.set_ylabel("Electric field")
+        ax.grid(True)
+
+        def animate(i):
+            line.set_ydata(Et[i])
+
+        anim = FuncAnimation(fig, animate, interval = 50, frames = len(Et) - 1)
+
+        #plt.show()
+
+        anim.save(file_dir, writer = "pillow") 

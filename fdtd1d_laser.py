@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # Usage:
 # fdtd = fdtd1d_laser()
@@ -16,8 +17,7 @@ class fdtd1d_laser(object):
     def __init__(self, X = 500, dx = 1e-4, source = 99,
                  c = 1.0, frequency = 1000, 
                  gperp = 35, ka = 1000, 
-                 die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0,
-                 sample = 300):
+                 die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0):
         """FDTD input arguments in CGS units:
         X: number of grid cells in the x direction
         dx: grid cell size
@@ -32,7 +32,6 @@ class fdtd1d_laser(object):
         n2: refractive index of the laser dielectric
         n3: refractive index of the output mirror
         D0: polarization constant of the laser dielectric
-        sample: location along the dielectric to measure the time dependent electric field
         """
         
         # Physical simulation parameters
@@ -132,7 +131,7 @@ class fdtd1d_laser(object):
             self.Hy = self.Hy - self.dt / self.dx * np.diff(self.Ez)
             
             # Save the sample data to a vector for export
-            self.Et.append(self.Ez[self.sample])
+            self.Et.append(self.Ez.copy())
         
             if np.remainder(n, int(T / 10)) == 0:
                 print('Percent Complete: {:.0f}%'.format(n / T * 100))
@@ -157,17 +156,25 @@ class fdtd1d_laser(object):
         plt.grid('on')
         plt.show()
         
-    def plot_et(self, t0 = None, t1 = None):
-        # plot the time dependent electric field solution Et
-        if t0 is None:
-            t0 = 0
-        if t1 is None:
-            t1 = len(self.Et)
-        if t1 > len(self.Et):
-            t1 = len(self.Et)
-        plt.figure(figsize = (10, 5))
-        plt.plot(self.Et[t0:t1], 'red')
-        plt.xlabel("t")
-        plt.ylabel("Ez(t)")
-        plt.grid('on')
-        plt.show()
+    def animate_et(self, file_dir = "laser_animation.gif", N = 500):
+        # animate self.Et as a .gif file.
+        # N: number of total steps to save as .gif animation.
+        Et = self.Et[-N:]
+        
+        fig, ax = plt.subplots(figsize = (10, 5))
+        ax.set(xlim = [-10, 510], ylim = [-15, 15])
+        line = ax.plot(range(len(Et[0])), Et[0], color = "r", linewidth = 2)[0]
+        ax.set_xlabel("x")
+        ax.set_ylabel("Electric field")
+        ax.grid(True)
+        ax.axvline(x = self.die1, color = 'k', linewidth = 2)
+        ax.axvline(x = self.die2, color = 'k', linestyle = '-.', linewidth = 2)
+
+        def animate(i):
+            line.set_ydata(Et[i])
+
+        anim = FuncAnimation(fig, animate, interval = 50, frames = len(Et) - 1)
+
+        #plt.show()
+
+        anim.save(file_dir, writer = "pillow")  
