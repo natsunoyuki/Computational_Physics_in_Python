@@ -156,12 +156,12 @@ class fdtd1d_laser(object):
         plt.grid('on')
         plt.show()
         
-    def animate_et(self, file_dir = "laser_animation.gif", N = 500):
+    def animate(self, file_dir = "laser_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
         Et = self.Et[-N:]
         
-        fig, ax = plt.subplots(figsize = (10, 5))
+        fig, ax = plt.subplots()
         ax.set(xlim = [-10, 510], ylim = [-15, 15])
         line = ax.plot(range(len(Et[0])), Et[0], color = "r", linewidth = 2)[0]
         ax.set_xlabel("x")

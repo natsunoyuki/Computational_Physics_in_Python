@@ -48,7 +48,7 @@ class fdtd1d(object):
         self.x = np.arange(0, Nx, 1)
         self.Dx = np.arange(0.5, Nx-0.5, 1)
 
-    def run(self, n_iter = 150):
+    def run(self, n_iter = 180):
         # Main FDTD Loops
         dt = self.dt
         dx = self.dx
@@ -91,12 +91,12 @@ class fdtd1d(object):
         plt.xlabel("x")
         plt.show()
         
-    def animate_et(self, file_dir = "fdtd_1d_animation.gif", N = 500):
+    def animate(self, file_dir = "fdtd_1d_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
         Et = self.E_t[-N:]
         
-        fig, ax = plt.subplots(figsize = (10, 5))
+        fig, ax = plt.subplots()
         ax.set(xlim = [-10, 210], ylim = [-1, 1])
         line = ax.plot(range(len(Et[0])), Et[0], color = "r", linewidth = 2)[0]
         ax.set_xlabel("x")
