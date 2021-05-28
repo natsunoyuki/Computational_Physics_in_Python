@@ -94,17 +94,17 @@ class fdtd2d:
             self.E_t.append(self.E_z.copy())
             
     def plot(self, i = 70):
-        plt.figure(figsize = (10, 10))
+        plt.figure(figsize = (5, 5))
         #plt.pcolormesh(self.x, self.y, self.E_z, shading = "auto", cmap = "gray")
         plt.pcolormesh(self.x, self.y, self.E_t[i], 
                        #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
-                       shading = "auto", cmap = "viridis")
+                       shading = "auto", cmap = "bwr")
         plt.axis("equal")
         plt.xlabel("x")
         plt.ylabel("y")
         plt.grid(True)
         plt.axis("equal")
-        plt.colorbar()
+        #plt.colorbar()
         plt.show()
             
     def animate(self, file_dir = "fdtd_1d_animation.gif", N = 500):
@@ -115,7 +115,7 @@ class fdtd2d:
         fig, ax = plt.subplots(figsize = (5, 5))
         cax = ax.pcolormesh(self.x, self.y, E_t[0], 
                             vmin = np.min(E_t), vmax = np.max(E_t), 
-                            shading = "auto", cmap = "viridis")
+                            shading = "auto", cmap = "bwr")
         plt.axis("equal")
         plt.grid(True)
 
