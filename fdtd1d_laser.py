@@ -14,12 +14,12 @@ class fdtd1d_laser(object):
     # On the left side of the integration grid a 1st order Mur boundary is
     # emplaced as the absorbing boundary conditions. Therefore the laser is
     # restricted to output only on the right side of the cavity.
-    def __init__(self, X = 500, dx = 1e-4, source = 99,
+    def __init__(self, Nx = 500, dx = 1e-4, source = 99,
                  c = 1.0, frequency = 1000, 
                  gperp = 35, ka = 1000, 
                  die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0):
         """FDTD input arguments in CGS units:
-        X: number of grid cells in the x direction
+        Nx: number of grid cells in the x direction
         dx: grid cell size
         source: location of power source in the laser
         c: speed of light
@@ -35,7 +35,7 @@ class fdtd1d_laser(object):
         """
         
         # Physical simulation parameters
-        self.X = X # number of spatial grid cells in the x direction
+        self.Nx = Nx # number of spatial grid cells in the x direction
         self.dx = dx # spatial grid cell size
         self.source = source # power source location in cells
         self.c = c # speed of light
@@ -66,16 +66,16 @@ class fdtd1d_laser(object):
         self.c8 = 1.0 / self.dt + self.gperp / 2.0
         self.c9 = -1.0 / self.dt + self.gperp / 2.0
               
-        # Initialize Ez and Hy field vectors in normalised CGS units
-        self.Ez = np.zeros(self.X) 
-        # staggered Hy grid which means Hy is one fewer grid cell than Ez
-        self.Hy = np.zeros(self.X - 1) 
+        # Initialize E_y and H_z field vectors in normalised CGS units
+        self.E_y = np.zeros(self.Nx) 
+        # staggered H_z grid which means H_z is one fewer grid cell than E_y
+        self.H_z = np.zeros(self.Nx - 1) 
         
         # Initialize Absorbing Boundary Conditions at the left end of the grid
         self.Ezh = 0 
         
         # Dielectric slab parameters
-        self.E = np.ones(self.X) * n1 ** 2 # permittivity
+        self.E = np.ones(self.Nx) * n1 ** 2 # dielectric constant strength E (epsilon)
         self.E[0] = 0 # perfect reflector on the left side
         self.die1 = die1 # left most position of dielectric slab
         self.die2 = die2 # right most position of dielectric slab
@@ -85,73 +85,73 @@ class fdtd1d_laser(object):
         # U0 = 1 for all cells. So we do not need to explicitly have a vector 
         # for U0
         self.D0 = D0 # polarization
-        self.D = self.D0 * np.ones(X)
-        self.P = np.zeros(X) # polarization vector
-        self.Place = np.zeros(X) # polarization one time step before
-        self.Pold = np.zeros(X) # polarization two time steps before
+        self.D = self.D0 * np.ones(self.Nx)
+        self.P = np.zeros(self.Nx) # polarization vector
+        self.Place = np.zeros(self.Nx) # polarization one time step before
+        self.Pold = np.zeros(self.Nx) # polarization two time steps before
         
         # Prepare vector to hold electric field at a particular location over 
         # the entire time frame of the FDTD loop.
-        self.Et = [] # time based field measured at sample
+        self.E_t = [] # time based field measured at sample
         self.sample = die2 - 1 # sampling location along the x axis, 0 indexing
         
-        self.x = np.arange(0, X, 1)
-        self.Dx = np.arange(1, X, 1)        
+        self.x = np.arange(0, self.Nx, 1)
+        self.Dx = np.arange(1, self.Nx, 1)        
         
     def get_fields(self):
-        return self.Ez, self.Hy
+        return self.E_y, self.H_z
     
     def get_et(self):
-        return self.Et
+        return self.E_t
 
-    def run(self, T = 10000):
+    def run(self, n_iter = 10000):
         print("Running FDTD...")
         # Main FDTD Loops
-        for n in range(T):
-            # Update the polarization vector
-            self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.Ez[self.die1:self.die2] * self.D[self.die1:self.die2])
-            self.Pold = self.Place.copy() # DO NOT SIMPLY USE Pold=Place! Use .copy() in python!
+        for n in range(n_iter):
+            # Update P
+            self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.E_y[self.die1:self.die2] * self.D[self.die1:self.die2])
+            self.Pold = self.Place.copy() 
             self.Place = self.P.copy() # carry the current value of P for two time steps
             
-            # Update electric field vector
-            self.Ez[1:self.X-1] = self.Ez[1:self.X-1] - 4 * np.pi / self.E[1:self.X-1] * (self.P[1:self.X-1] - self.Pold[1:self.X-1]) - self.dt / self.dx / self.E[1:self.X-1] * np.diff(self.Hy)
+            # Update E_y
+            self.E_y[1:-1] = self.E_y[1:-1] - 4 * np.pi / self.E[1:-1] * (self.P[1:-1] - self.Pold[1:-1]) - self.dt / self.dx / self.E[1:-1] * np.diff(self.H_z)
             
-            # Update Population Inversion Vector
-            self.D[self.die1:self.die2] = 1.0 / self.c5 * (self.c6 * self.D[self.die1:self.die2] + self.gpara * self.D0 + self.c7 * self.Ez[self.die1:self.die2] * (self.c8 * self.P[self.die1:self.die2] + self.c9 * self.Pold[self.die1:self.die2]))
+            # Update D
+            self.D[self.die1:self.die2] = 1.0 / self.c5 * (self.c6 * self.D[self.die1:self.die2] + self.gpara * self.D0 + self.c7 * self.E_y[self.die1:self.die2] * (self.c8 * self.P[self.die1:self.die2] + self.c9 * self.Pold[self.die1:self.die2]))
             
             # Initiate EM pulse
             pulse = np.exp((-((n+1) * self.dt - 3 * np.sqrt(2) * self.sig)**2) / (2*self.sig**2))
-            self.Ez[self.source] = self.Ez[self.source] + pulse
+            self.E_y[self.source] = self.E_y[self.source] + pulse
             
             # 1st order Mur Boundaries for dielectric to absorb the outgoing field
-            self.Ez[self.X-1] = self.Ezh + (self.c * self.dt - self.dx) / (self.c * self.dt + self.dx) * (self.Ez[self.X-2] - self.Ez[self.X-1])
-            self.Ezh = self.Ez[self.X-2]
+            self.E_y[-1] = self.Ezh + (self.c * self.dt - self.dx) / (self.c * self.dt + self.dx) * (self.E_y[-2] - self.E_y[-1])
+            self.Ezh = self.E_y[-2]
             
-            # Update magnetic field vect WITH DIELECTRIC
-            self.Hy = self.Hy - self.dt / self.dx * np.diff(self.Ez)
+            # Update H_z
+            self.H_z = self.H_z - self.dt / self.dx * np.diff(self.E_y)
             
             # Save the sample data to a vector for export
-            self.Et.append(self.Ez.copy())
+            self.E_t.append(self.E_y.copy())
         
-            if np.remainder(n, int(T / 10)) == 0:
-                print('Percent Complete: {:.0f}%'.format(n / T * 100))
+            #if np.remainder(n, int(T / 10)) == 0:
+            #    print('Percent Complete: {:.0f}%'.format(n / T * 100))
                 
         print("Run complete!")
 
     def plot(self):
-        # plot the Ez and Hy fields in space
+        # plot the E_y and H_z fields in space
         plt.figure(figsize = (10, 5))
         plt.subplot(2, 1, 1)
-        plt.plot(self.x, self.Ez, 'b')
+        plt.plot(self.x, self.E_y, 'r')
         plt.axvline(x = self.die1, color = 'k')
         plt.axvline(x = self.die2, color = 'k', linestyle = '-.')
-        plt.ylabel('Ez')
+        plt.ylabel('E_y')
         plt.grid('on')
         plt.subplot(2, 1, 2)
-        plt.plot(self.Dx, self.Hy, 'g')
+        plt.plot(self.Dx, self.H_z, 'g')
         plt.axvline(x = self.die1, color = 'k')
         plt.axvline(x = self.die2, color = 'k', linestyle = '-.')
-        plt.ylabel('Hy')
+        plt.ylabel('H_z')
         plt.xlabel("x")
         plt.grid('on')
         plt.show()
@@ -159,7 +159,7 @@ class fdtd1d_laser(object):
     def animate(self, file_dir = "laser_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
-        Et = self.Et[-N:]
+        Et = self.E_t[-N:]
         
         fig, ax = plt.subplots()
         ax.set(xlim = [-10, 510], ylim = [-15, 15])
