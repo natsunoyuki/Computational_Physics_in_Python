@@ -274,10 +274,10 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
     xmin = -R
     xmax = R
     params = [R, L, V0]
-    print("Axis limits:",xmin, xmax, ymin, ymax)
+    print("xmin: {}, xmax: {}, ymin: {}, ymax: {}".format(xmin, xmax, ymin, ymax))
 
     Nx = int(Ny * 2 * R / (2.0 * R + L))
-    print("Nx, Ny:",Nx, Ny)
+    print("Nx: {}, Ny: {}".format(Nx, Ny))
     
     def Vfun2D(X, Y, params):
         R = params[0] # stadium radius
@@ -328,10 +328,10 @@ def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
     xmin = -R
     xmax = R
     params = [R, L, V0]
-    print("Axis limits:",xmin, xmax, ymin, ymax)
+    print("xmin: {}, xmax: {}, ymin: {}, ymax: {}".format(xmin, xmax, ymin, ymax))
 
     Nx = int(Ny * 2 * R / (2.0 * R + L))
-    print("Nx, Ny:",Nx, Ny)
+    print("Nx: {}, Ny: {}".format(Nx, Ny))
     
     def Vfun2D(X, Y, params):
         R = params[0] # stadium radius
@@ -371,4 +371,4 @@ def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
         X, Y = np.meshgrid(H[2], H[3])
         ax.plot_surface(X, Y , PSI, cmap='jet')
         ax.axis('off')
-        plt.show()      
+        plt.show()    
