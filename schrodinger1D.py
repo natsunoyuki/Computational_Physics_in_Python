@@ -93,12 +93,15 @@ def eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, findpsi = True):
     H = schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs, findpsi)
     evl = H[0] # energy eigen values
     indices = np.argsort(evl)
+    
     print("Energy eigenvalues:")
     for i,j in enumerate(evl[indices]):
         print("{}: {:.2f}".format(i + 1, j))
+        
     evt = H[1] # eigen vectors 
     x = H[2] # x dimensions 
     i = 0
+    
     plt.figure(figsize = (8, 8))
     while i < neigs:
         n = indices[i]
@@ -157,7 +160,7 @@ def infinite_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20
     
     eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
     
-def double_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [-0.5, 0.01]):
+def double_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [-0.5, 0.01, 7]):
     """
     Plots the 1D double well wavefunctions.
     
@@ -178,7 +181,8 @@ def double_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, 
     def Vfun(x, params):
         A = params[0]
         B = params[1]
-        V = A * x ** 2 + B * x ** 4
+        C = params[2]
+        V = A * x ** 2 + B * x ** 4 + C
         return V
 
     eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
