@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse import linalg as sla
 
-def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
+def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs = 20, findpsi = False):
     """
     Solves the 1 dimensional Schrodinger equation numerically
     
@@ -40,7 +40,7 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
     # Obtain the potential function values:
     V = Vfun(x, params)
     # create the Hamiltonian Operator matrix:
-    H = sparse.eye(Nx, Nx, format='lil') * 2
+    H = sparse.eye(Nx, Nx, format = "lil") * 2
     for i in range(Nx - 1):
         #H[i, i] = 2
         H[i, i + 1] = -1
@@ -54,7 +54,7 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
     H = H.tocsc()
     
     # obtain neigs solutions from the sparse matrix
-    [evl, evt] = sla.eigs(H, k=neigs, which='SM')
+    [evl, evt] = sla.eigs(H, k = neigs, which = "SM")
 
     for i in range(neigs):
         # normalize the eigen vectors
@@ -68,7 +68,7 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs=20, findpsi=False):
     else: 
         return evl, evt, x
 
-def eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,findpsi=True):
+def eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, findpsi = True):
     """
     Evaluates the wavefunctions given a particular potential energy function Vfun
     
@@ -95,11 +95,11 @@ def eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,findpsi=True):
     indices = np.argsort(evl)
     print("Energy eigenvalues:")
     for i,j in enumerate(evl[indices]):
-        print("{}: {:.2f}".format(i+1,j))
+        print("{}: {:.2f}".format(i + 1, j))
     evt = H[1] # eigen vectors 
     x = H[2] # x dimensions 
     i = 0
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize = (8, 8))
     while i < neigs:
         n = indices[i]
         y = np.real(np.conj(evt[:, n]) * evt[:, n])  
@@ -109,7 +109,7 @@ def eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,findpsi=True):
         i = i + 1  
     plt.show()
 
-def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[1]):
+def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [1]):
     """
     Plots the 1D quantum harmonic oscillator wavefunctions.
     
@@ -130,9 +130,9 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[1]):
         V = params[0] * x**2
         return V
     
-    eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,True)
+    eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
     
-def infinite_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=1e10):
+def infinite_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = 1e10):
     """
     Plots the 1D infinite well wavefunctions.
     
@@ -150,14 +150,14 @@ def infinite_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params
         parameter of Vfun     
     """
     def Vfun(x, params):
-        V = x*0
+        V = x * 0
         V[:100]=params
         V[-100:]=params
         return V
     
-    eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,True)
+    eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
     
-def double_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[-0.5,0.01]):
+def double_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [-0.5, 0.01]):
     """
     Plots the 1D double well wavefunctions.
     
@@ -181,4 +181,4 @@ def double_well_wavefunctions_plot(xmin=-10, xmax=10, Nx=500, neigs=20, params=[
         V = A * x ** 2 + B * x ** 4
         return V
 
-    eval_wavefunctions(xmin,xmax,Nx,Vfun,params,neigs,True)
+    eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
