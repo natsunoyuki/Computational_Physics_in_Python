@@ -161,7 +161,7 @@ class fdtd1d_laser(object):
         Et = self.E_t[-N:]
         
         fig, ax = plt.subplots()
-        ax.set(xlim = [-10, 510], ylim = [-15, 15])
+        ax.set(xlim = [self.x[0], self.x[-1]], ylim = [-np.max(np.abs(Et)), np.max(np.abs(Et))])
         line = ax.plot(range(len(Et[0])), Et[0], color = "r", linewidth = 2)[0]
         ax.set_xlabel("x")
         ax.set_ylabel("Electric field")
