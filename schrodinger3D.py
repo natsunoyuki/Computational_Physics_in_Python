@@ -6,7 +6,7 @@ from scipy.sparse import linalg as sla
 def schrodinger3D(xmin, xmax, Nx, 
                   ymin, ymax, Ny, 
                   zmin, zmax, Nz, 
-                  Vfun3D, params, neigs, E0=0.0, findpsi=False):
+                  Vfun3D, params, neigs, E0 = 0.0, findpsi = False):
     """
     Solves the 3 dimensional Schrodinger equation numerically
     
@@ -62,7 +62,7 @@ def schrodinger3D(xmin, xmax, Nx,
     z = np.linspace(zmin, zmax, Nz)
     dz = z[1] - z[0]
 
-    V = Vfun3D(x, y, z, params)
+    V = Vfun3D(x, y, z, params) # this is a 1D np.array
 
     # create the 3D Hamiltonian matrix
     Hx = create_hamiltonian(Nx, dx)
@@ -73,11 +73,10 @@ def schrodinger3D(xmin, xmax, Nx,
     Iy = sparse.eye(Ny)
     Iz = sparse.eye(Nz)
     
-    # Combine the 3 individual 1 dimensional Hamiltonians
-    # using Kronecker products
-    Hxy = sparse.kron(Iy, Hx) + sparse.kron(Hy, Ix)
-    Ixy = sparse.kron(Iy, Ix)
-    H = sparse.kron(Iz, Hxy) + sparse.kron(Hz, Ixy)
+    # Combine the 3 individual 1 dimensional Hamiltonians using Kronecker products
+    Hxy = sparse.kron(Hx, Iy) + sparse.kron(Ix, Hy)
+    Ixy = sparse.kron(Ix, Iy)
+    H = sparse.kron(Hxy, Iz) + sparse.kron(Ixy, Hz)
     
     # Convert to lil form and add potential energy function
     H = H.tolil()
@@ -86,7 +85,7 @@ def schrodinger3D(xmin, xmax, Nx,
 
     # convert to csc form and solve the eigenvalue problem
     H = H.tocsc()  
-    [evl, evt] = sla.eigs(H, k=neigs, sigma=E0)
+    [evl, evt] = sla.eigs(H, k = neigs, sigma = E0)
             
     if findpsi == False:
         return evl
@@ -104,7 +103,7 @@ def create_hamiltonian(Nx, dx):
     dx: float
         step size of the 1 spatial dimension
     """
-    H = sparse.eye(Nx, Nx, format='lil') * 2
+    H = sparse.eye(Nx, Nx, format = "lil") * 2
     for i in range(Nx - 1):
         H[i, i + 1] = -1
         H[i + 1, i] = -1
@@ -118,7 +117,6 @@ def sho_eigenenergies(xmin = -5, xmax = 5, Nx = 50, ymin = -5, ymax = 5, Ny = 50
     Theoretically, the eigenenergies are given by: E = hw(n + 3/2), n = nx + ny + nz.
     However, as we set h = w = 1, and we scale the energies during the Hamiltonian creation
     by 2, the theoretical eigenenergies are given by: E = 2n + 3.
-
     xmin: float
         minimum value of the x axis
     xmax: float
@@ -173,7 +171,7 @@ def sho_eigenenergies(xmin = -5, xmax = 5, Nx = 50, ymin = -5, ymax = 5, Ny = 50
         for i in range(Nx):
             for j in range(Ny):
                 for k in range(Nz):
-                    V[vindex] = params[0]*X[i] ** 2 + params[1]*Y[j] ** 2 + params[2]*Z[k] ** 2
+                    V[vindex] = params[0]*X[i]**2 + params[1]*Y[j]**2 + params[2]*Z[k]**2
                     vindex = vindex + 1
         return V
     
