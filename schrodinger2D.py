@@ -4,9 +4,9 @@ from scipy import sparse, linalg
 from scipy.sparse import linalg as sla
 from mpl_toolkits.mplot3d import Axes3D
  
-def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0, findpsi=False):
+def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0 = 0.0, findpsi = False):
     """
-    Solves the 2 dimensional Schrodinger equation numerically
+    Solves the 2 dimensional Schrodinger equation numerically.
     
     Inputs
     ------
@@ -58,7 +58,7 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0,
 
     Ix = sparse.eye(Nx, Nx)
     Iy = sparse.eye(Ny, Ny)
-    H = sparse.kron(Iy, Hx) + sparse.kron(Hy, Ix)  
+    H = sparse.kron(Hx, Iy) + sparse.kron(Ix, Hy)  
 
     # Convert to lil form and add potential energy function
     H = H.tolil()
@@ -67,7 +67,7 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0,
 
     # convert to csc form and solve the eigenvalue problem
     H = H.tocsc()  
-    [evl, evt] = sla.eigs(H, k=neigs, sigma=E0)
+    [evl, evt] = sla.eigs(H, k = neigs, sigma = E0)
             
     if findpsi == False:
         return evl
@@ -76,7 +76,7 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0=0.0,
 
 def create_hamiltonian(Nx, dx):
     """
-    Creates a 1 dimensional Hamiltonian
+    Creates a 1 dimensional Hamiltonian.
    
     Inputs
     ------
@@ -90,7 +90,7 @@ def create_hamiltonian(Nx, dx):
     H: np.array
         np.array of the Hamiltonian
     """
-    H = sparse.eye(Nx, Nx, format='lil') * 2
+    H = sparse.eye(Nx, Nx, format = "lil") * 2
     for i in range(Nx - 1):
         H[i, i + 1] = -1
         H[i + 1, i] = -1
@@ -138,74 +138,24 @@ def eval_wavefunctions(xmin, xmax, Nx,
     print("Energy eigenvalues:")
     for i,j in enumerate(evl[indices]):
         print("{}: {:.2f}".format(i + 1, np.real(j)))
+        
     evt = H[1] # eigenvectors
-    plt.figure(figsize=(15, 15))
+    
+    plt.figure(figsize = (15, 15))
     # unpack the vector into 2 dimensions for plotting:
     for n in range(neigs):
         psi = evt[:, n]  
-        PSI = oneD_to_twoD(Nx, Ny, psi)
-        PSI = np.abs(PSI)
-        plt.subplot(2, int(neigs/2), n + 1)    
-        plt.pcolormesh(np.flipud(PSI), cmap = 'jet')
-        plt.axis('equal')
-        plt.axis('off')
+        PSI = psi.reshape(Nx, Ny) 
+        PSI = np.abs(PSI) ** 2
+        plt.subplot(2, int(neigs / 2), n + 1)    
+        plt.pcolormesh(np.transpose(PSI), cmap = "jet")
+        plt.axis("equal")
+        plt.axis("off")
     plt.show()
 
-def twoD_to_oneD(Nx, Ny, F):
-    """
-    from a 2D matrix F return a 1D vector V
-    
-    Inputs
-    ------
-    Nx: int
-        number of elements in the x axis
-    Ny: int
-        number of elements in the y axis
-    F: np.array
-        2D np.array to convert to 1D
-        
-    Returns
-    -------
-    V: np.array
-        converted 1D array
-    """
-    V = np.zeros(Nx * Ny)
-    vindex = 0
-    for i in range(Ny):
-        for j in range(Nx):
-            V[vindex] = F[i, j]
-            vindex = vindex + 1                      
-    return V
-
-def oneD_to_twoD(Nx, Ny, psi):
-    """
-    from a 1D vector psi return a 2D matrix PSI
-    
-    Inputs
-    ------
-    Nx: int
-        number of elements in the x axis
-    Ny: int
-        number of elements in the y axis
-    psi: np.array
-        1D np.array to convert to 2D
-        
-    Returns
-    -------
-    PSI: np.array
-        converted 2D array
-    """
-    vindex = 0
-    PSI = np.zeros([Ny, Nx], dtype='complex')
-    for i in range(Ny):
-        for j in range(Nx):
-            PSI[i, j] = psi[vindex]
-            vindex = vindex + 1 
-    return PSI
-
-def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
-                           ymin=-10, ymax=10, Ny=250,
-                           params=[1,1], neigs=6, E0=10, findpsi=True):
+def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 250,
+                           ymin = -10, ymax = 10, Ny = 250,
+                           params = [1, 1], neigs = 6, E0 = 0, findpsi = True):
     """
     Evaluates and plots the 2D QSHO wavefunctions.
     
@@ -242,15 +192,15 @@ def sho_wavefunctions_plot(xmin=-10, xmax=10, Nx=250,
         vindex = 0
         for i in range(Nx):
             for j in range(Ny):
-                V[vindex] = params[0]*X[i] ** 2 + params[1]*Y[j] ** 2
+                V[vindex] = params[0] * X[i]**2 + params[1] * Y[j]**2
                 vindex = vindex + 1
         return V
     
-    eval_wavefunctions(xmin,xmax,Nx,
-                       ymin,ymax,Ny,
-                       Vfun,params,neigs,E0,findpsi)
+    eval_wavefunctions(xmin, xmax, Nx,
+                       ymin, ymax, Ny,
+                       Vfun, params, neigs, E0, findpsi)
 
-def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
+def stadium_wavefunctions_plot(R = 1, L = 2, V0 = 1e6, neigs = 6, E0 = 500, Ny = 250):
     """
     Evaluates and plots the 2D stadium potential wavefunctions.
     
@@ -287,23 +237,23 @@ def stadium_wavefunctions_plot(R=1, L=2, V0=1e6, neigs=6, E0=500, Ny=250):
         Nx = len(X)
         Ny = len(Y)
         [x, y] = np.meshgrid(X, Y)
-        F = np.zeros([Ny, Nx])
+        F = np.zeros([Nx, Ny])
 
         for i in range(Nx):
             for j in range(Ny):
                 if abs(X[i]) == R or abs(Y[j]) == R + 0.5 * L:
-                    F[j, i] = V0
+                    F[i, j] = V0
                 if (abs(Y[j]) - 0.5 * L) > 0 and np.sqrt((abs(Y[j]) - 0.5 * L) ** 2 + X[i] ** 2) >= R:
-                    F[j, i] = V0
-        # simplify the 2D matrix to a 1D array for faster processing:
-        V = twoD_to_oneD(Nx, Ny, F)                
+                    F[i, j] = V0
+                    
+        V = F.reshape(Nx * Ny)             
         return V
  
     eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
                        Vfun2D, params, neigs, E0, findpsi=True)
 
-def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
+def stadium_wavefunctions_3dplot(R = 1, L = 0, V0 = 1e6, neigs = 6, E0 = 70, Ny = 250):
     """
     Evaluates and plots the 2D stadium potential wavefunctions.
     Instead of plotting the wavefunctions as a heatmap, plot them as a 3D surface instead
@@ -341,16 +291,16 @@ def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
         Nx = len(X)
         Ny = len(Y)
         [x, y] = np.meshgrid(X, Y)
-        F = np.zeros([Ny, Nx])
+        F = np.zeros([Nx, Ny])
 
         for i in range(Nx):
             for j in range(Ny):
                 if abs(X[i]) == R or abs(Y[j]) == R + 0.5 * L:
-                    F[j, i] = V0
+                    F[i, j] = V0
                 if (abs(Y[j]) - 0.5 * L) > 0 and np.sqrt((abs(Y[j]) - 0.5 * L) ** 2 + X[i] ** 2) >= R:
-                    F[j, i] = V0
-        # simplify the 2D matrix to a 1D array for faster processing:
-        V = twoD_to_oneD(Nx, Ny, F)                
+                    F[i, j] = V0
+                    
+        V = F.reshape(Nx * Ny)             
         return V
     
     H = schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0, True)
@@ -364,11 +314,11 @@ def stadium_wavefunctions_3dplot(R=1, L=0, V0=1e6, neigs=6, E0=70, Ny=250):
     # unpack the vector into 2 dimensions for plotting:
     for n in range(evt.shape[1]):
         psi = evt[:, n]  
-        PSI = oneD_to_twoD(Nx, Ny, psi)
+        PSI = psi.reshape(Nx, Ny) 
         PSI = np.abs(PSI)**2
-        fig = plt.figure(figsize=(10, 10))
-        ax = fig.add_subplot(111, projection='3d')
+        fig = plt.figure(figsize = (10, 10))
+        ax = fig.add_subplot(111, projection = "3d")
         X, Y = np.meshgrid(H[2], H[3])
-        ax.plot_surface(X, Y , PSI, cmap='jet')
-        ax.axis('off')
-        plt.show()    
+        ax.plot_surface(X, Y , np.transpose(PSI), cmap = "jet")
+        ax.axis("off")
+        plt.show() 
