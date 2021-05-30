@@ -22,10 +22,10 @@ class fdtd1d_laser(object):
         Nx: number of grid cells in the x direction
         dx: grid cell size
         source: location of power source in the laser
-        c: speed of light
+        c: speed of light, normalized to 1 by default
         frequency: frequency of the power source
         gperp: g_perpendicular lasing parameter
-        ka: ka lasing parameter
+        ka: ka lasing parameter (wave number)
         die1: starting location of the laser cavity dielectric
         die2: ending location of the laser cavity dielectric
         n1: refractive index of the surrounding medium
@@ -34,28 +34,28 @@ class fdtd1d_laser(object):
         D0: polarization constant of the laser dielectric
         """
         
-        # Physical simulation parameters
+        # Initialize physical simulation parameters
         self.Nx = Nx # number of spatial grid cells in the x direction
         self.dx = dx # spatial grid cell size
         self.source = source # power source location in cells
         self.c = c # speed of light
         
-        # Initial pulse parameters
+        # Initialize pulse parameters
         self.frequency = frequency # frequency of the initial pulse
         self.T0 = 1.0 / frequency # period of the initial pulse
         self.tc = 5 * self.T0 / 2.0 # time constant of the initial pulse
         self.sig = self.tc / 2.0 / np.sqrt(2 * np.log(2)) # gaussian width of the initial pulse
         self.FWHM = 2 * np.sqrt(2 * np.log(2)) * self.sig # FWHM of the initial pulse
         
-        # Integration time step, taking into account Courant number
+        # Initialize integration time step, taking into account Courant number
         self.dt = self.dx / (1.0 * self.c) # Courant magic step size = 1
         
-        # Maxwell Bloch equation parameters
+        # Initialize Maxwell Bloch equation parameters
         self.gperp = gperp # g_perpendicular lasing parameter
         self.gpara = gperp / 100.0 # g_parallel lasing parameter
         self.ka = ka # ka lasing parameter
         
-        # Maxwell Bloch Ez field and Hy field constants
+        # Initialize Maxwell Bloch Ez field and Hy field constants
         self.c1 = 1.0 / self.dt ** 2 + self.gperp / self.dt
         self.c2 = 2.0 / self.dt ** 2 - self.ka ** 2 - self.gperp ** 2
         self.c3 = 1.0 / self.dt ** 2 - self.gperp / self.dt
@@ -71,25 +71,30 @@ class fdtd1d_laser(object):
         # staggered H_z grid which means H_z is one fewer grid cell than E_y
         self.H_z = np.zeros(self.Nx - 1) 
         
-        # Initialize Absorbing Boundary Conditions at the left end of the grid
+        # Initialize Mur Absorbing Boundary Conditions at the left end of the grid
         self.Ezh = 0 
         
-        # Dielectric slab parameters
-        self.E = np.ones(self.Nx) * n1 ** 2 # dielectric constant strength E (epsilon)
-        self.E[0] = 0 # perfect reflector on the left side
+        # Initialize dielectric slab relative permittivity and permeability
+        self.E = np.ones(self.Nx) * n1 ** 2 # relative permittivity of entire grid (epsilon)
+        self.E[0] = 0 # perfect reflector on the left side: permittivity = 0
         self.die1 = die1 # left most position of dielectric slab
         self.die2 = die2 # right most position of dielectric slab
-        self.E[die1:die2] = n2 ** 2 # dielectric constant strength E
-        self.E[die2]= n3 ** 2 # dielectric constant of the output mirror
-        # we assume that the dielectric is a perfect magnetic material
-        # U0 = 1 for all cells. So we do not need to explicitly have a vector 
-        # for U0
-        self.D0 = D0 # polarization
-        self.D = self.D0 * np.ones(self.Nx)
+        self.E[self.die1:self.die2] = n2 ** 2 # relative permittivity of the dielectric slab
+        self.E[self.die2]= n3 ** 2 # relative permittivity of the output mirror
+        # we assume that the dielectric is a perfect magnetic material with
+        # mu = 1 everywhere. So we do not need to explicitly have a vector 
+        # for mu. If this condition is not satisfied, then mu must be taken
+        # into account as well in the simulation.
+        
+        # Initialize polarization
         self.P = np.zeros(self.Nx) # polarization vector
         self.Place = np.zeros(self.Nx) # polarization one time step before
         self.Pold = np.zeros(self.Nx) # polarization two time steps before
         
+        # Initialize laser pump and population inversion
+        self.D0 = D0 # pump strength (assumed to be a constant)
+        self.D = self.D0 * np.ones(self.Nx) # population inversion due to pump
+
         # Prepare vector to hold electric field at a particular location over 
         # the entire time frame of the FDTD loop.
         self.E_t = [] # time based field measured at sample
@@ -105,8 +110,7 @@ class fdtd1d_laser(object):
         return self.E_t
 
     def run(self, n_iter = 10000):
-        print("Running FDTD...")
-        # Main FDTD Loops
+        # Main FDTD Loop
         for n in range(n_iter):
             # Update P
             self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.E_y[self.die1:self.die2] * self.D[self.die1:self.die2])
@@ -130,13 +134,8 @@ class fdtd1d_laser(object):
             # Update H_z
             self.H_z = self.H_z - self.dt / self.dx * np.diff(self.E_y)
             
-            # Save the sample data to a vector for export
+            # Save the time dependent data for animation, export etc.
             self.E_t.append(self.E_y.copy())
-        
-            #if np.remainder(n, int(T / 10)) == 0:
-            #    print('Percent Complete: {:.0f}%'.format(n / T * 100))
-                
-        print("Run complete!")
 
     def plot(self):
         # plot the E_y and H_z fields in space
