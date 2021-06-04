@@ -31,7 +31,7 @@ class fdtd1d_laser(object):
         n1: refractive index of the surrounding medium
         n2: refractive index of the laser dielectric
         n3: refractive index of the output mirror
-        D0: polarization constant of the laser dielectric
+        D0: laser pump strength
         """
         
         # Initialize physical simulation parameters
