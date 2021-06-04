@@ -56,9 +56,9 @@ class fdtd1d_laser(object):
         self.ka = ka # ka lasing parameter
         
         # Initialize Maxwell Bloch Ez field and Hy field constants
-        self.c1 = 1.0 / self.dt ** 2 + self.gperp / self.dt
+        self.c1 = 1.0 / self.dt ** 2 + self.gperp / self.dt / 2.0
         self.c2 = 2.0 / self.dt ** 2 - self.ka ** 2 - self.gperp ** 2
-        self.c3 = 1.0 / self.dt ** 2 - self.gperp / self.dt
+        self.c3 = 1.0 / self.dt ** 2 - self.gperp / self.dt / 2.0
         self.c4 = self.ka * self.gperp / 2.0 / np.pi
         self.c5 = 1.0 / self.dt + self.gpara / 2.0
         self.c6 = 1.0 / self.dt - self.gpara / 2.0
