@@ -93,7 +93,9 @@ class fdtd1d_laser(object):
         
         # Initialize laser pump and population inversion
         self.D0 = D0 # pump strength (assumed to be a constant)
-        self.D = self.D0 * np.ones(self.Nx) # population inversion due to pump
+        self.D = np.zeros(self.Nx)
+        self.D[self.die1:self.die2] = self.D0 # population inversion
+        #self.D = self.D0 * np.ones(self.Nx)
 
         # Prepare vector to hold electric field at a particular location over 
         # the entire time frame of the FDTD loop.
