@@ -38,7 +38,7 @@ class fdtd2d_laser:
         self.E_z = np.zeros([Nx, Ny])
         
         # Dielectric slab attributes
-        self.radius = 150
+        self.radius = 200
         self.mask = np.zeros([Nx, Ny])
         for i in range(Nx):
             for j in range(Ny):
