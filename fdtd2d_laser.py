@@ -3,8 +3,12 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import tqdm
 
+# fdtd = fdtd2d_laser()
+# fdtd.run()
+# fdtd.plot()
+
 class fdtd2d_laser:
-    def __init__(self, Nx = 501, Ny = 501, c = 1, dx = 1e-4, dy = 1e-4):
+    def __init__(self, Nx = 501, Ny = 501, c = 1, dx = 1, dy = 1):
         # Grid attributes
         self.Nx = Nx
         self.Ny = Ny
@@ -22,9 +26,9 @@ class fdtd2d_laser:
         self.source_y = int(Ny / 2)
 
         # Maxwell-Bloch equation parameters
-        self.gperp = 35.0
+        self.gperp = 0.01
         self.gpara = self.gperp / 100.0
-        self.ka = 1000
+        self.ka = 0.1
         
         # Magnetic fields H_x and H_y
         self.H_x = np.zeros([Nx, Ny - 1])
@@ -40,10 +44,10 @@ class fdtd2d_laser:
             for j in range(Ny):
                 if np.sqrt((i - self.source_x)**2 + (j - self.source_y)**2) < self.radius:
                     self.mask[i, j] = 1
-        self.n1 = 1.0
-        self.n2 = 1.5
         
         # Permittivity and permeability
+        self.n1 = 1.0
+        self.n2 = 3.0
         self.E = np.logical_not(self.mask) * self.n1**2 + self.mask * self.n2**2 
         # we assume that the dielectric is a perfect magnetic material with
         # mu = 1 everywhere. So we do not need to explicitly have a vector 
@@ -56,7 +60,7 @@ class fdtd2d_laser:
         self.Pold = np.zeros([Nx, Ny]) # polarization two time steps before
         
         # Population inversion D
-        self.D0 = 1.0 # pump strength
+        self.D0 = 10.0 # pump strength
         self.D = self.mask * self.D0
         
         # Time dependent field for plotting and animation
@@ -71,21 +75,41 @@ class fdtd2d_laser:
         self.H_y_n_1 = self.H_y_n.copy() # data for t = n-1
         
     def run(self, n_iter = 10000):
+        # MB equation constants
+        c1 = 1.0 / self.dt ** 2 + self.gperp / self.dt / 2.0
+        c2 = 2.0 / self.dt ** 2 - self.ka ** 2 - self.gperp ** 2
+        c3 = 1.0 / self.dt ** 2 - self.gperp / self.dt / 2.0
+        c4 = self.ka * self.gperp / 2.0 / np.pi
+        c5 = 1.0 / self.dt + self.gpara / 2.0
+        c6 = 1.0 / self.dt - self.gpara / 2.0
+        c7 = 2.0 * np.pi * self.gpara / self.ka
+        c8 = 1.0 / self.dt + self.gperp / 2.0
+        c9 = -1.0 / self.dt + self.gperp / 2.0
+        
+        # Mur absorbing boundary constants
+        dtdx = np.sqrt(self.dt / self.dx * self.dt / self.dy)
+        dtdx_2 = 1 / dtdx + 2 + dtdx
+        c_0 = -(1 / dtdx - 2 + dtdx) / dtdx_2
+        c_1 = -2 * (dtdx - 1 / dtdx) / dtdx_2
+        c_2 = 4 * (dtdx + 1 / dtdx) / dtdx_2
         for n in tqdm.trange(n_iter):
             # Update magnetic fields H_x, H_y
             self.H_x = self.H_x - self.dt / self.dy * (self.E_z[:, 1:] - self.E_z[:, :-1])
             self.H_y = self.H_y + self.dt / self.dx * (self.E_z[1:, :] - self.E_z[:-1, :])
 
             # Update polarization field P
-
+            self.P = self.mask /c1*(c2*self.P - c3*self.Pold - c4*self.E_z*self.D)
+            self.Pold = self.Place.copy() 
+            self.Place = self.P.copy() # carry the current value of P for two time steps
             
             # Update electric field E_z
-            diff_H_x = self.dt / self.dy * (self.H_x[1:-1, 1:] - self.H_x[1:-1, :-1])
-            diff_H_y = self.dt / self.dx * (self.H_y[1:, 1:-1] - self.H_y[:-1, 1:-1])
-            self.E_z[1:-1, 1:-1] = self.E_z[1:-1, 1:-1] + (diff_H_y - diff_H_x)
-
-            # Update population inversion D
+            diff_H_x = self.dt / self.dy / self.E[1:-1, 1:-1] * (self.H_x[1:-1, 1:] - self.H_x[1:-1, :-1])
+            diff_H_y = self.dt / self.dx / self.E[1:-1, 1:-1] * (self.H_y[1:, 1:-1] - self.H_y[:-1, 1:-1])
+            diff_P = -4 * np.pi / self.E[1:-1, 1:-1] * (self.P[1:-1, 1:-1] - self.Pold[1:-1, 1:-1])
+            self.E_z[1:-1, 1:-1] = self.E_z[1:-1, 1:-1] + diff_P + (diff_H_y - diff_H_x)
             
+            # Update population inversion D
+            self.D = self.mask / c5*(c6*self.D + self.gpara*self.D0 + c7*self.E_z*(c8*self.P + c9*self.Pold))
             
             # Pulse at time step 
             tp = 30
@@ -97,11 +121,6 @@ class fdtd2d_laser:
             self.E_z[self.source_x, self.source_y] = self.E_z[self.source_x, self.source_y] + pulse
 
             # Mur ABC for top boundary
-            dtdx = np.sqrt(self.dt / self.dx * self.dt / self.dy)
-            dtdx_2 = 1 / dtdx + 2 + dtdx
-            c_0 = -(1 / dtdx - 2 + dtdx) / dtdx_2
-            c_1 = -2 * (dtdx - 1 / dtdx) / dtdx_2
-            c_2 = 4 * (dtdx + 1 / dtdx) / dtdx_2
             self.E_z[0, :] = c_0 * (self.E_z[2, :] + self.E_z_n_1[0, :]) +    \
                              c_1 * (self.E_z_n[0, :] + self.E_z_n[2, :] -    \
                                     self.E_z[1, :] - self.E_z_n_1[1, :]) +    \
@@ -144,6 +163,8 @@ class fdtd2d_laser:
         plt.pcolormesh(self.x, self.y, self.E_t[i], 
                        #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
                        shading = "auto", cmap = "bwr")
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        plt.gca().add_patch(circle)
         plt.axis("equal")
         plt.xlabel("x")
         plt.ylabel("y")
@@ -152,7 +173,7 @@ class fdtd2d_laser:
         #plt.colorbar()
         plt.show()
             
-    def animate(self, file_dir = "fdtd_1d_animation.gif", N = 500):
+    def animate(self, file_dir = "fdtd_2d_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
         E_t = self.E_t[-N:]
@@ -162,7 +183,11 @@ class fdtd2d_laser:
                             vmin = np.min(E_t), vmax = np.max(E_t), 
                             shading = "auto", cmap = "bwr")
         plt.axis("equal")
-        plt.grid(True)
+        plt.xticks([])
+        plt.yticks([])
+        
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        plt.gca().add_patch(circle)
 
         def animate(i):
             cax.set_array(E_t[i].flatten())

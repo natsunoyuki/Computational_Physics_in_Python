@@ -32,6 +32,11 @@ class fdtd2d:
         self.H_y_n_1 = self.H_y_n.copy()
         
     def run(self, n_iter = 150):
+        dtdx = np.sqrt(self.dt / self.dx * self.dt / self.dy)
+        dtdx_2 = 1 / dtdx + 2 + dtdx
+        c_0 = -(1 / dtdx - 2 + dtdx) / dtdx_2
+        c_1 = -2 * (dtdx - 1 / dtdx) / dtdx_2
+        c_2 = 4 * (dtdx + 1 / dtdx) / dtdx_2
         for n in range(n_iter):
             # Update magnetic fields at time step n+1/2
             self.H_x = self.H_x - self.dt / self.dy * (self.E_z[:, 1:] - self.E_z[:, :-1])
@@ -52,11 +57,6 @@ class fdtd2d:
             self.E_z[self.source_x, self.source_y] = self.E_z[self.source_x, self.source_y] + pulse
 
             # Mur ABC for top boundary
-            dtdx = np.sqrt(self.dt / self.dx * self.dt / self.dy)
-            dtdx_2 = 1 / dtdx + 2 + dtdx
-            c_0 = -(1 / dtdx - 2 + dtdx) / dtdx_2
-            c_1 = -2 * (dtdx - 1 / dtdx) / dtdx_2
-            c_2 = 4 * (dtdx + 1 / dtdx) / dtdx_2
             self.E_z[0, :] = c_0 * (self.E_z[2, :] + self.E_z_n_1[0, :]) +    \
                              c_1 * (self.E_z_n[0, :] + self.E_z_n[2, :] -    \
                                     self.E_z[1, :] - self.E_z_n_1[1, :]) +    \
@@ -107,7 +107,7 @@ class fdtd2d:
         #plt.colorbar()
         plt.show()
             
-    def animate(self, file_dir = "fdtd_1d_animation.gif", N = 500):
+    def animate(self, file_dir = "fdtd_2d_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
         E_t = self.E_t[-N:]
