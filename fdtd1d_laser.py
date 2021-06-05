@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import tqdm
 
 # Usage:
-# fdtd = fdtd1d_laser()
+# fdtd = fdtd = fdtd1d_laser(Nx = 500, dx = 1, source = 99, c = 1.0, frequency = 0.1, gperp = 0.01, ka = 0.1, die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0)
 # fdtd.run()
 # fdtd.plot()
 
@@ -14,9 +15,7 @@ class fdtd1d_laser(object):
     # On the left side of the integration grid a 1st order Mur boundary is
     # emplaced as the absorbing boundary conditions. Therefore the laser is
     # restricted to output only on the right side of the cavity.
-    def __init__(self, Nx = 500, dx = 1e-4, source = 99,
-                 c = 1.0, frequency = 1000, 
-                 gperp = 35, ka = 1000, 
+    def __init__(self, Nx = 500, dx = 1e-4, source = 99, c = 1.0, frequency = 1000, gperp = 35, ka = 1000, 
                  die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0):
         """FDTD input arguments in CGS units:
         Nx: number of grid cells in the x direction
@@ -113,7 +112,7 @@ class fdtd1d_laser(object):
 
     def run(self, n_iter = 10000):
         # Main FDTD Loop
-        for n in range(n_iter):
+        for n in tqdm.trange(n_iter):
             # Update P
             self.P[self.die1:self.die2] = 1.0 / self.c1 * (self.c2 * self.P[self.die1:self.die2] - self.c3 * self.Pold[self.die1:self.die2] - self.c4 * self.E_y[self.die1:self.die2] * self.D[self.die1:self.die2])
             self.Pold = self.Place.copy() 
