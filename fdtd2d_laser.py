@@ -156,6 +156,8 @@ class fdtd2d_laser:
 
             #self.E_t.append(self.E_z[self.source_x, self.source_y])
             self.E_t.append(self.E_z.copy())
+            if len(self.E_t) > 500:
+                del self.E_t[0]
             
     def plot(self, i = 70):
         plt.figure(figsize = (5, 5))
