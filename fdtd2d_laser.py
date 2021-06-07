@@ -180,7 +180,7 @@ class fdtd2d_laser:
     def plot(self, i = -1):
         plt.figure(figsize = (5, 5))
         #plt.pcolormesh(self.x, self.y, self.E_z, shading = "auto", cmap = "gray")
-        plt.pcolormesh(self.x, self.y, self.E_t[i], 
+        plt.pcolormesh(self.x, self.y, self.E_t[i].T, 
                        #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
                        shading = "auto", cmap = "bwr")
         circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
@@ -205,7 +205,7 @@ class fdtd2d_laser:
         E_t = self.E_t[-N:]
 
         fig, ax = plt.subplots(figsize = (5, 5))
-        cax = ax.pcolormesh(self.x, self.y, E_t[0], 
+        cax = ax.pcolormesh(self.x, self.y, E_t[0].T, 
                             vmin = np.min(E_t), vmax = np.max(E_t), 
                             shading = "auto", cmap = "bwr")
         plt.axis("equal")
@@ -223,7 +223,7 @@ class fdtd2d_laser:
                 plt.gca().add_patch(circle)
 
         def animate(i):
-            cax.set_array(E_t[i].flatten())
+            cax.set_array(E_t[i].T.flatten())
 
         anim = FuncAnimation(fig, animate, interval = 50, frames = len(E_t) - 1)
 
