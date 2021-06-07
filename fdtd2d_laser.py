@@ -159,7 +159,7 @@ class fdtd2d_laser:
             if len(self.E_t) > 500:
                 del self.E_t[0]
             
-    def plot(self, i = 70):
+    def plot(self, i = -1):
         plt.figure(figsize = (5, 5))
         #plt.pcolormesh(self.x, self.y, self.E_z, shading = "auto", cmap = "gray")
         plt.pcolormesh(self.x, self.y, self.E_t[i], 
