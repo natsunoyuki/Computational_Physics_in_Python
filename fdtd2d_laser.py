@@ -8,7 +8,7 @@ import tqdm
 # fdtd.plot()
 
 class fdtd2d_laser:
-    def __init__(self, Nx = 501, Ny = 501, c = 1, dx = 1, dy = 1):
+    def __init__(self, Nx = 501, Ny = 501, c = 1, dx = 1, dy = 1, drill_holes = False):
         # Grid attributes
         self.Nx = Nx
         self.Ny = Ny
@@ -44,6 +44,24 @@ class fdtd2d_laser:
             for j in range(Ny):
                 if np.sqrt((i - self.source_x)**2 + (j - self.source_y)**2) < self.radius:
                     self.mask[i, j] = 1
+                    
+        self.drill_holes = drill_holes
+        if self.drill_holes == True:
+            self.sub_radius = 40
+            self.centres = [[150, 170], 
+                            [165, 300],
+                            [300, 120],
+                            [225, 220],
+                            [360, 330],
+                            [320, 220],
+                            [230, 360]]
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                for i in range(-c_x, c_x + self.sub_radius):
+                    for j in range(-c_y, c_y + self.sub_radius):
+                        if np.sqrt((i - c_x)**2 + (j - c_y)**2) < self.sub_radius:
+                            self.mask[i, j] = 0
         
         # Permittivity and permeability
         self.n1 = 1.0
@@ -167,6 +185,12 @@ class fdtd2d_laser:
                        shading = "auto", cmap = "bwr")
         circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
         plt.gca().add_patch(circle)
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                plt.gca().add_patch(circle)
         plt.axis("equal")
         plt.xlabel("x")
         plt.ylabel("y")
@@ -190,6 +214,13 @@ class fdtd2d_laser:
         
         circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
         plt.gca().add_patch(circle)
+        
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                plt.gca().add_patch(circle)
 
         def animate(i):
             cax.set_array(E_t[i].flatten())
