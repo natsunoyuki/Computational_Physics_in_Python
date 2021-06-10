@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 import tqdm
 
 # Usage:
-# fdtd = fdtd = fdtd1d_laser(Nx = 500, dx = 1, source = 99, c = 1.0, frequency = 0.1, gperp = 0.01, ka = 0.1, die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0)
+# fdtd = fdtd = fdtd1d_laser()
 # fdtd.run()
 # fdtd.plot()
 
@@ -15,8 +15,8 @@ class fdtd1d_laser(object):
     # On the left side of the integration grid a 1st order Mur boundary is
     # emplaced as the absorbing boundary conditions. Therefore the laser is
     # restricted to output only on the right side of the cavity.
-    def __init__(self, Nx = 500, dx = 1e-4, source = 99, c = 1.0, frequency = 1000, gperp = 35, ka = 1000, 
-                 die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 1.0):
+    def __init__(self, Nx = 500, dx = 1, source = 99, c = 1.0, frequency = 0.1, gperp = 0.01, ka = 0.1, 
+                 die1 = 1, die2 = 301, n1 = 1, n2 = 1.5, n3 = 1, D0 = 0.04):
         """FDTD input arguments in CGS units:
         Nx: number of grid cells in the x direction
         dx: grid cell size
@@ -98,8 +98,9 @@ class fdtd1d_laser(object):
 
         # Prepare vector to hold electric field at a particular location over 
         # the entire time frame of the FDTD loop.
-        self.E_t = [] # time based field measured at sample
-        self.sample = die2 - 1 # sampling location along the x axis, 0 indexing
+        self.E_t = [] # time based field measured across the grid for animation purposes
+        self.sample = int((Nx + die2) / 2) # sampling location along the x axis, 0 indexing
+        self.E_measure = [] # measure time dependent field measured at a single location
         
         self.x = np.arange(0, self.Nx, 1)
         self.Dx = np.arange(1, self.Nx, 1)        
@@ -137,6 +138,10 @@ class fdtd1d_laser(object):
             
             # Save the time dependent data for animation, export etc.
             self.E_t.append(self.E_y.copy())
+            if len(self.E_t) > 500:
+                del self.E_t[0]
+                
+            self.E_measure.append(self.E_y[self.sample])
 
     def plot(self):
         # plot the E_y and H_z fields in space
@@ -153,6 +158,16 @@ class fdtd1d_laser(object):
         plt.axvline(x = self.die2, color = 'k', linestyle = '-.')
         plt.ylabel('H_z')
         plt.xlabel("x")
+        plt.grid('on')
+        plt.show()
+        
+    def measure(self):
+        # plot the measured field in time
+        plt.figure(figsize = (10, 5))
+        t = np.arange(0, len(self.E_measure)*self.dt, self.dt)
+        plt.plot(t, self.E_measure)
+        plt.ylabel('E_y')
+        plt.xlabel("t")
         plt.grid('on')
         plt.show()
         
