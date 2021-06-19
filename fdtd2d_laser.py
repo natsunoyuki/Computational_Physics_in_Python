@@ -47,7 +47,7 @@ class fdtd2d_laser:
                     
         self.drill_holes = drill_holes
         if self.drill_holes == True:
-            self.sub_radius = 40
+            self.sub_radius = 30
             self.centres = [[150, 170], 
                             [165, 300],
                             [300, 120],
@@ -83,6 +83,7 @@ class fdtd2d_laser:
         
         # Time dependent field for plotting and animation
         self.E_t = []
+        self.E_timeseries = []
         
         # Mur absorbing boundaries
         self.E_z_n = self.E_z.copy()     # data for t = n
@@ -176,6 +177,8 @@ class fdtd2d_laser:
             self.E_t.append(self.E_z.copy())
             if len(self.E_t) > 500:
                 del self.E_t[0]
+                
+            self.E_timeseries.append(self.E_z[450, 450])
             
     def plot(self, i = -1):
         plt.figure(figsize = (5, 5))
@@ -198,7 +201,15 @@ class fdtd2d_laser:
         plt.axis("equal")
         #plt.colorbar()
         plt.show()
-            
+        
+    def plot_timeseries(self):
+        t = np.arange(0, self.dt * len(self.E_timeseries), self.dt)
+        plt.plot(t, self.E_timeseries)
+        plt.xlabel("Time")
+        plt.ylabel("E")
+        plt.grid(True)
+        plt.show()
+
     def animate(self, file_dir = "fdtd_2d_animation.gif", N = 500):
         # animate self.Et as a .gif file.
         # N: number of total steps to save as .gif animation.
