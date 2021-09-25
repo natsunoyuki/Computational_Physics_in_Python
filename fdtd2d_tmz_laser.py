@@ -311,15 +311,15 @@ class fdtd2d_tmz_laser:
                               vmin = np.min(H_x_t), vmax = 0.1 * np.max(H_x_t), 
                               shading = "auto", cmap = "gray")
         
-        circle = ax1.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
-        ax1.gca().add_patch(circle)
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        ax1.add_patch(circle)
         
         if self.drill_holes == True:
             for c in range(len(self.centres)):
                 c_x = self.centres[c][0]
                 c_y = self.centres[c][1]
-                circle = ax1.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
-                ax1.gca().add_patch(circle)
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                ax1.add_patch(circle)
         
         ax1.axis("equal")
         ax1.grid(True)
@@ -328,15 +328,15 @@ class fdtd2d_tmz_laser:
                               vmin = np.min(H_y_t), vmax = 0.1 * np.max(H_y_t), 
                               shading = "auto", cmap = "gray")
         
-        circle = ax2.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
-        ax2.gca().add_patch(circle)
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        ax2.add_patch(circle)
         
         if self.drill_holes == True:
             for c in range(len(self.centres)):
                 c_x = self.centres[c][0]
                 c_y = self.centres[c][1]
-                circle = ax2.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
-                ax2.gca().add_patch(circle)
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                ax2.add_patch(circle)
         
         ax2.axis("equal")
         ax2.grid(True)
