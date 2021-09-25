@@ -89,7 +89,9 @@ class fdtd2d_tmz_laser:
         self.D = self.mask * self.D0
         
         # Time dependent field for plotting and animation
-        self.E_t = []
+        self.E_z_t = []
+        self.H_x_t = []
+        self.H_y_t = []
         self.E_timeseries = []
         
         # Mur absorbing boundaries
@@ -184,18 +186,33 @@ class fdtd2d_tmz_laser:
             self.E_z_n = self.E_z.copy()     # data for t = n
 
             #self.E_t.append(self.E_z[self.source_x, self.source_y])
-            self.E_t.append(self.E_z.copy())
-            if len(self.E_t) > 500:
-                del self.E_t[0]
+            self.E_z_t.append(self.E_z.copy())
+            self.H_x_t.append(self.H_x.copy())
+            self.H_y_t.append(self.H_y.copy())
+            if len(self.E_z_t) > 500:
+                del self.E_z_t[0]
+                del self.H_x_t[0]
+                del self.H_y_t[0]
                 
             self.E_timeseries.append(self.E_z[450, 450])
+
+    def plot_timeseries(self):
+        t = np.arange(0, self.dt * len(self.E_timeseries), self.dt)
+        plt.plot(t, self.E_timeseries)
+        plt.xlabel("Time")
+        plt.ylabel("E")
+        plt.grid(True)
+        plt.show()
+        
+    def plot_E(self, i = 70):
+        if i >= len(self.E_z_t):
+            i = len(self.E_z_t) - 1
             
-    def plot(self, i = -1):
         plt.figure(figsize = (5, 5))
-        #plt.pcolormesh(self.x, self.y, self.E_z, shading = "auto", cmap = "gray")
-        plt.pcolormesh(self.x, self.y, self.E_t[i].T, 
+        plt.pcolormesh(self.X, self.Y, self.E_z_t[i].T, 
                        #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
                        shading = "auto", cmap = "bwr")
+        
         circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
         plt.gca().add_patch(circle)
         if self.drill_holes == True:
@@ -204,34 +221,67 @@ class fdtd2d_tmz_laser:
                 c_y = self.centres[c][1]
                 circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
                 plt.gca().add_patch(circle)
+        
         plt.axis("equal")
         plt.xlabel("x")
         plt.ylabel("y")
         plt.grid(True)
-        plt.axis("equal")
-        #plt.colorbar()
         plt.show()
         
-    def plot_timeseries(self):
-        t = np.arange(0, self.dt * len(self.E_timeseries), self.dt)
-        plt.plot(t, self.E_timeseries)
-        plt.xlabel("Time")
-        plt.ylabel("E")
+    def plot_H(self, i = 70):
+        if i >= len(self.H_x_t):
+            i = len(self.H_x_t) - 1
+            
+        plt.figure(figsize = (10, 5))
+        plt.subplot(1, 2, 1)
+        plt.pcolormesh(self.X[1:, :], self.Y[1:, :], self.H_x_t[i].T, 
+                       #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
+                       shading = "auto", cmap = "bwr")
+        
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        plt.gca().add_patch(circle)
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                plt.gca().add_patch(circle)
+        
+        plt.axis("equal")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.grid(True)
+        plt.subplot(1, 2, 2)
+        plt.pcolormesh(self.X[:, 1:], self.Y[:, 1:], self.H_y_t[i].T, 
+                       #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
+                       shading = "auto", cmap = "bwr")
+        
+        circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        plt.gca().add_patch(circle)
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = plt.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                plt.gca().add_patch(circle)
+        
+        plt.axis("equal")
+        plt.xlabel("x")
+        plt.ylabel("y")
         plt.grid(True)
         plt.show()
-
-    def animate(self, file_dir = "fdtd_2d_animation.gif", N = 500):
-        # animate self.Et as a .gif file.
+        
+    def animate_E(self, file_dir = "fdtd_2d_E_animation.gif", N = 500):
+        # animate self.E_z_t as a .gif file.
         # N: number of total steps to save as .gif animation.
-        E_t = self.E_t[-N:]
+        E_z_t = self.E_z_t[-N:]
 
         fig, ax = plt.subplots(figsize = (5, 5))
-        cax = ax.pcolormesh(self.x, self.y, E_t[0].T, 
-                            vmin = np.min(E_t), vmax = np.max(E_t), 
-                            shading = "auto", cmap = "bwr")
+        cax = ax.pcolormesh(self.X, self.Y, E_z_t[0].T, 
+                            vmin = np.min(E_z_t), vmax = np.max(E_z_t), 
+                            shading = "auto", cmap = "gray")
         plt.axis("equal")
-        plt.xticks([])
-        plt.yticks([])
+        plt.grid(True)
         
         circle = plt.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
         plt.gca().add_patch(circle)
@@ -244,10 +294,57 @@ class fdtd2d_tmz_laser:
                 plt.gca().add_patch(circle)
 
         def animate(i):
-            cax.set_array(E_t[i].T.flatten())
+            cax.set_array(E_z_t[i].T.flatten())
 
-        anim = FuncAnimation(fig, animate, interval = 50, frames = len(E_t) - 1)
-
-        #plt.show()
-
+        anim = FuncAnimation(fig, animate, interval = 50, frames = len(E_z_t) - 1)
         anim.save(file_dir, writer = "pillow")
+        plt.show()
+        
+    def animate_H(self, file_dir = "fdtd_2d_H_animation.gif", N = 500):
+        # animate self.H_x,y_t as a .gif file.
+        # N: number of total steps to save as .gif animation.
+        H_x_t = self.H_x_t[-N:]
+        H_y_t = self.H_y_t[-N:]
+        
+        fig, (ax1, ax2) = plt.subplots(nrows = 1, ncols = 2, figsize = (10, 5))
+        cax1 = ax1.pcolormesh(self.X[1:, :], self.Y[1:, :], H_x_t[0].T, 
+                              vmin = np.min(H_x_t), vmax = 0.1 * np.max(H_x_t), 
+                              shading = "auto", cmap = "gray")
+        
+        circle = ax1.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        ax1.gca().add_patch(circle)
+        
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = ax1.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                ax1.gca().add_patch(circle)
+        
+        ax1.axis("equal")
+        ax1.grid(True)
+        
+        cax2 = ax2.pcolormesh(self.X[:, 1:], self.Y[:, 1:], H_y_t[0].T, 
+                              vmin = np.min(H_y_t), vmax = 0.1 * np.max(H_y_t), 
+                              shading = "auto", cmap = "gray")
+        
+        circle = ax2.Circle((self.source_x, self.source_y), self.radius, color = "k", fill = False)
+        ax2.gca().add_patch(circle)
+        
+        if self.drill_holes == True:
+            for c in range(len(self.centres)):
+                c_x = self.centres[c][0]
+                c_y = self.centres[c][1]
+                circle = ax2.Circle((c_x, c_y), self.sub_radius, color = "k", fill = False)
+                ax2.gca().add_patch(circle)
+        
+        ax2.axis("equal")
+        ax2.grid(True)
+
+        def animate(i):
+            cax1.set_array(H_x_t[i].T.flatten())
+            cax2.set_array(H_y_t[i].T.flatten())
+
+        anim = FuncAnimation(fig, animate, interval = 50, frames = len(H_x_t) - 1)
+        anim.save(file_dir, writer = "pillow")
+        plt.show()

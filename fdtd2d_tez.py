@@ -29,7 +29,7 @@ class fdtd2d_tez:
         self.E_x = np.zeros([Nx - 1, Ny])
         self.E_y = np.zeros([Nx, Ny - 1])
 
-        self.H_t = []
+        self.H_z_t = []
         self.E_x_t = []
         self.E_y_t = []
         
@@ -106,9 +106,9 @@ class fdtd2d_tez:
             self.H_z_n_1 = self.H_z_n.copy() # data for t = n-1
             self.H_z_n = self.H_z.copy()     # data for t = n
 
-            self.H_t.append(self.H_z.copy())
-            if len(self.H_t) > 500:
-                del self.H_t[0]
+            self.H_z_t.append(self.H_z.copy())
+            if len(self.H_z_t) > 500:
+                del self.H_z_t[0]
                 
             self.E_x_t.append(self.E_x.copy())
             if len(self.E_x_t) > 500:
@@ -119,10 +119,10 @@ class fdtd2d_tez:
                 del self.E_y_t[0]
             
     def plot_H(self, i = 70):
-        if i >= len(self.H_t):
-            i = len(self.H_t) - 1
+        if i >= len(self.H_z_t):
+            i = len(self.H_z_t) - 1
         plt.figure(figsize = (5, 5))
-        plt.pcolormesh(self.x, self.y, self.H_t[i].T, 
+        plt.pcolormesh(self.X[1:, 1:], self.Y[1:, 1:], self.H_z_t[i].T, 
                        #vmin = np.min(self.E_t), vmax = np.max(self.E_t), 
                        shading = "auto", cmap = "bwr")
         plt.axis("equal")
@@ -159,20 +159,18 @@ class fdtd2d_tez:
     def animate_H(self, file_dir = "fdtd_2d_animation.gif", N = 500):
         # animate self.H_t as a .gif file.
         # N: number of total steps to save as .gif animation.
-        H_t = self.H_t[-N:]
+        H_z_t = self.H_z_t[-N:]
 
         fig, ax = plt.subplots(figsize = (5, 5))
-        cax = ax.pcolormesh(self.x, self.y, H_t[0].T, 
-                            vmin = np.min(H_t), vmax = 0.1 * np.max(H_t), 
-                            shading = "auto", cmap = "bwr")
+        cax = ax.pcolormesh(self.X[1:, 1:], self.Y[1:, 1:], H_z_t[0].T, 
+                            vmin = np.min(H_z_t), vmax = 0.1 * np.max(H_z_t), 
+                            shading = "auto", cmap = "gray")
         plt.axis("equal")
         plt.grid(True)
 
         def animate(i):
-            cax.set_array(H_t[i].T.flatten())
+            cax.set_array(H_z_t[i].T.flatten())
 
-        anim = FuncAnimation(fig, animate, interval = 50, frames = len(H_t) - 1)
-
-        #plt.show()
-
+        anim = FuncAnimation(fig, animate, interval = 50, frames = len(H_z_t) - 1)
         anim.save(file_dir, writer = "pillow")
+        plt.show()
