@@ -1,52 +1,16 @@
 import numpy as np
+#from scipy import *
 import matplotlib.pyplot as plt
+#from scipy import random
 import time
+np.random.seed() # seed the RNG.
 
-# FUNCTION CALLS TO TEST THE FUNCTION:
-
-# 2D ising metropolis algorithm
-# [T2,M2]=ising_metropolis_2D(1.0,0.0,np.linspace(0.01,5,50),20,20,100000,100000)
-
-# 2D ising heatbath algorithm
-# [TH2,MH2]=ising_heatbath_2D(1.0,0.0,np.linspace(0.01,5,50),20,20,100000,100000)
-
-# ND ising metropolis algorithm
-# [TX,MX]=ising_metropolis_ND(2,1,0,np.linspace(0.01,5,50),20,100000,100000)
-
-# This script has been superseded with the parallel process version:
-# https://github.com/natsunoyuki/Computational_Physics_in_Python/blob/master/montecarlo_parallel.py
+# This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
+# crystal. 2 methods are listed here.
+# The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
+# Ising model solved using the Heatbath algorithm.
 
 def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
-    """
-    This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
-    crystal. 2 methods are listed here.
-    The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
-    Ising model solved using the Heatbath algorithm.
-    
-    Inputs
-    ------
-    J: int
-        coupling strength
-    H: float
-        external magnetic field strength
-    T: np.array
-        np.array of temperatures to conduct the MC simulation over
-    Nx: int
-        number of spins along x
-    Ny: int
-        number of spins along y
-    steps: int
-        number of MC steps to take
-    warmup_steps: int
-        number of parallel processors to use
-        
-    Returns
-    -------
-    T: np.array
-        temperatures
-    M: np.array
-        magnetization
-    """
     start = time.time()
     N = Nx * Ny  # number of spins
     k = 1  # boltzmann constant
@@ -77,10 +41,11 @@ def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
             spin = ising2D(Nx, Ny, spin, pflip)
 
             # together with the Monte Carlo steps, perform the "Measurements:"
-            M[t] = M[t] + sum(spin) / N
+            M[t] = M[t] + np.sum(spin) / N
 
         # take the average values of the measurements over all MC steps
-        M[t] = abs(M[t] / steps)  # take only the absolute values of M
+        M[t] = np.abs(M[t] / steps)  # take only the absolute values of M
+        
     end = int(time.time() - start)
     print("Total time elapsed:", end)
     
@@ -88,12 +53,9 @@ def ising_metropolis_2D(J, H, T, Nx, Ny, steps, warmup_steps):
     #plt.xlabel('T')
     #plt.ylabel('M')
     #plt.show()   
-    return [T,M]
+    return [T, M]
 
 def ising2D(Nx, Ny, spin, pflip):
-    """
-    2D ising model
-    """
     N = Nx * Ny
     r = int(np.random.random() * N)
     x = np.mod(r, Nx)
@@ -125,37 +87,9 @@ def ising2D(Nx, Ny, spin, pflip):
     
 
 def ising_metropolis_1D(J, H, T, N, steps, warmup_steps):
-    """
-    This code using the Monte-Carlo method to simulate the magnetic behavior of a 2 dimensional
-    crystal. 2 methods are listed here.
-    The first shows the Ising model solved using the Metropolis algorithm, and the second shows the
-    Ising model solved using the Heatbath algorithm.
-    
-    Inputs
-    ------
-    J: int
-        coupling strength
-    H: float
-        external magnetic field strength
-    T: np.array
-        np.array of temperatures to conduct the MC simulation over
-    N: int
-        number of spins on each side of the cubic crystal
-    steps: int
-        number of MC steps to take
-    warmup_steps: int
-        number of MC warmup steps to take
-        
-    Returns
-    -------
-    T: np.array
-        temperatures
-    M: np.array
-        magnetization
-    """
     start = time.time()
     k = 1  # boltzmann constant
-    M = zeros(len(T))
+    M = np.zeros(len(T))
  
     for t in range(len(T)):
         spin = np.ones(N)  # reset the spins for each temperature
@@ -182,10 +116,10 @@ def ising_metropolis_1D(J, H, T, N, steps, warmup_steps):
             spin = ising1D(N, spin, pflip)
 
             # together with the Monte Carlo steps, perform the "Measurements:"
-            M[t] = M[t] + sum(spin) / N
+            M[t] = M[t] + np.sum(spin) / N
 
         # take the average values of the measurements over all MC steps
-        M[t] = abs(M[t] / steps)  # take only the absolute values of M
+        M[t] = np.abs(M[t] / steps)  # take only the absolute values of M
     end = int(time.time() - start)
     print("Total time elapsed:", end)
     
@@ -196,12 +130,9 @@ def ising_metropolis_1D(J, H, T, N, steps, warmup_steps):
     return [T,M] 
 
 def ising1D(N, spin, pflip):
-    """
-    1D ising model
-    """
     r = int(np.random.random() * N)  # randomly choose a lattice site
     s0 = spin[r]
-    s1 = spin[np.mod(r + 1, N)]  #     S2 S0 S1       
+    s1 = spin[mod(r + 1, N)]  #     S2 S0 S1       
     s2 = spin[r - 1]
     neighbours = s1 + s2
     if s0 == 1:
@@ -240,7 +171,7 @@ def ising_heatbath_1D(J, H, T, N, steps, warmup_steps):
             r = int(np.random.random() * N)  # randomly choose a lattice site
 
             s0 = spin[r]
-            s1 = spin[np.mod(r + 1, N)]  #     S2 S0 S1       
+            s1 = spin[mod(r + 1, N)]  #     S2 S0 S1       
             s2 = spin[r - 1]
          
             neighbours = s1 + s2
@@ -261,7 +192,7 @@ def ising_heatbath_1D(J, H, T, N, steps, warmup_steps):
             r = int(np.random.random() * N)  # randomly choose a lattice site
 
             s0 = spin[r]
-            s1 = spin[np.mod(r + 1, N)]  #     S2 S0 S1       
+            s1 = spin[mod(r + 1, N)]  #     S2 S0 S1       
             s2 = spin[r - 1]
          
             neighbours = s1 + s2
@@ -278,10 +209,11 @@ def ising_heatbath_1D(J, H, T, N, steps, warmup_steps):
                 spin[r] = -1  # flip the spin up
 
             # together with the Monte Carlo steps, perform the "Measurements:"
-            M[t] = M[t] + sum(spin) / N
+            M[t] = M[t] + np.sum(spin) / N
 
         # take the average values of the measurements over all MC steps
-        M[t] = abs(M[t] / steps)
+        M[t] = np.abs(M[t] / steps)
+        
     end = int(time.time() - start)
     print("Total time elapsed:", end)
     
@@ -363,10 +295,10 @@ def ising_heatbath_2D(J, H, T, Nx, Ny, steps, warmup_steps):
                 spin[r] = -1
 
             # together with the Monte Carlo steps, perform the "Measurements:"
-            M[t] = M[t] + sum(spin) / N
+            M[t] = M[t] + np.sum(spin) / N
 
         # take the average values of the measurements over all MC steps
-        M[t] = abs(M[t] / steps)
+        M[t] = np.abs(M[t] / steps)
     end = int(time.time() - start)
     print("Total time elapsed:", end)
     
@@ -374,7 +306,7 @@ def ising_heatbath_2D(J, H, T, Nx, Ny, steps, warmup_steps):
     #plt.xlabel('T')
     #plt.ylabel('M')
     #plt.show()
-    return [T, M]
+    return [T,M]
 
 def ising_metropolis_ND(D, J, H, T, Nx, steps, warmup_steps):
     #D = no. of dimensions
@@ -462,9 +394,9 @@ def ising_metropolis_ND(D, J, H, T, Nx, steps, warmup_steps):
                 if rand < pflip[pfliprow, pflipcol]:
                     spins[y, x] = -spins[y, x]                  
                 # together with the Monte Carlo steps, perform the "Measurements:"
-                M[t] = M[t] + sum(spins) / N
+                M[t] = M[t] + np.sum(spins) / N
             # take the average values of the measurements over all MC steps
-            M[t] = abs(M[t] / steps)
+            M[t] = np.abs(M[t] / steps)
         end = int(time.time() - start)
         print("Total time elapsed:", end)                
         return T, M
@@ -472,7 +404,7 @@ def ising_metropolis_ND(D, J, H, T, Nx, steps, warmup_steps):
         print('Three dimensional crystal')
         for t in range(len(T)):
             print('Current temperature:', T[t])
-            spins = np.ones((Nx,Nx,Nx))
+            spins = np.ones((Nx, Nx, Nx))
             B = 1 / (k * T[t])
             pflip = np.zeros([2, 7])  # there are a total of 10 weight values, 2 for 1,-1 and 7 for -6,-4,-2,0,2,4,6
             # for each value of T pre compute the weights so as to speed up the computing time:
@@ -550,8 +482,8 @@ def ising_metropolis_ND(D, J, H, T, Nx, steps, warmup_steps):
                 rand = np.random.random()
                 if rand < pflip[pfliprow, pflipcol]:
                     spins[z, y, x] = -spins[z, y, x]
-                M[t] = M[t] + sum(spins) / N
-            M[t] = abs(M[t] / steps)  # take only the absolute values of M
+                M[t] = M[t] + np.sum(spins) / N
+            M[t] = np.abs(M[t] / steps)  # take only the absolute values of M
         print("Total time elapsed:", time.time()-start)
         return T, M
     else:
@@ -583,17 +515,17 @@ def ising_metropolis_3D(J, H, T, Nx, Ny, Nz, steps, warmup_steps):
 
         # now for the warm up steps:
         for n in range(warmup_steps):
-            spin = ising3D(Nx,Ny,Nz,spin,pflip)
+            spin = ising3D(Nx, Ny, Nz, spin, pflip)
                 
         # now for the actual MC:
         for n in range(steps):
-            spin = ising3D(Nx,Ny,Nz,spin,pflip)
+            spin = ising3D(Nx, Ny, Nz, spin, pflip)
 
             # together with the Monte Carlo steps, perform the "Measurements:"
-            M[t] = M[t] + sum(spin) / N
+            M[t] = M[t] + np.sum(spin) / N
 
         # take the average values of the measurements over all MC steps
-        M[t] = abs(M[t] / steps)  # take only the absolute values of M
+        M[t] = np.abs(M[t] / steps)  # take only the absolute values of M
     end = int(time.time() - start)
     print("Total time elapsed:", end)
     
@@ -601,9 +533,9 @@ def ising_metropolis_3D(J, H, T, Nx, Ny, Nz, steps, warmup_steps):
     #plt.xlabel('T')
     #plt.ylabel('M')
     #plt.show()   
-    return [T,M]
+    return [T, M]
 
-def ising3D(Nx,Ny,Nz,spin,pflip):
+def ising3D(Nx, Ny, Nz, spin, pflip):
     N = Nx * Ny * Nz
     r = int(np.random.random() * N)
     x = np.mod(r, Nx)
@@ -639,3 +571,10 @@ def ising3D(Nx,Ny,Nz,spin,pflip):
     if rand < pflip[pfliprow, pflipcol]:
         spin[r] = -spin[r] 
     return spin    
+#################################################################################################
+#FUNCTION CALLS TO TEST THE FUNCTION:
+"""
+[T2,M2]=ising_metropolis_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
+[TH2,MH2]=ising_heatbath_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
+[TX,MX]=ising_metropolis_ND(3,1,0,linspace(0.01,10,100),20,100000,100000);
+"""
