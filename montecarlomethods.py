@@ -574,7 +574,7 @@ def ising3D(Nx, Ny, Nz, spin, pflip):
 #################################################################################################
 #FUNCTION CALLS TO TEST THE FUNCTION:
 """
-[T2,M2]=ising_metropolis_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
-[TH2,MH2]=ising_heatbath_2D(1.0,0.0,linspace(0.01,5,50),20,20,100000,100000);
-[TX,MX]=ising_metropolis_ND(3,1,0,linspace(0.01,10,100),20,100000,100000);
+[T2, M2] = ising_metropolis_2D(1.0, 0.0, np.linspace(0.01, 5, 50), 20, 20, 100000, 100000);
+[TH2, MH2] = ising_heatbath_2D(1.0, 0.0, np.linspace(0.01, 5, 50), 20, 20, 100000, 100000);
+[TX, MX] = ising_metropolis_ND(3, 1, 0, np.linspace(0.01, 10, 100), 20, 100000, 100000);
 """
