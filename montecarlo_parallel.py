@@ -6,7 +6,7 @@ random.seed() #seed the RNG.
 import multiprocessing as mp
 
 class Worker:
-    def __init__(self,D,J,H,Nx,steps,warmup_steps,results):
+    def __init__(self,D, J, H, Nx, steps, warmup_steps, results):
         self.D = D # number of spatial dimensions. D = 2 or 3 only.
         self.J = J # coupling strength J
         self.H = H # external magnetic field H
@@ -251,7 +251,7 @@ def demo():
     This is a demo on how to perform MC simulations using the functions above.
     By default, the demo demonstrates the functions using a 2D lattice.
     """
-    T, M = main(D=2, J=1, H=0, T=np.linspace(0.01,10,100), Nx=20, steps=100000, nprocs=2)
+    T, M = main(D = 2, J = 1, H = 0, T = np.linspace(0.01,10,100), Nx = 20, steps = 100000, nprocs = 2)
     plt.figure(figsize = (15, 5))
     plt.plot(T, M)
     plt.xlabel("Temperature")
