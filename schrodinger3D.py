@@ -171,7 +171,7 @@ def create_3d_hamiltonian(Nx, dx, Ny = None, dy = None, Nz = None, dz = None):
     
     Hxy = create_2d_hamiltonian(Nx, dx, Ny, dy)
     Iz = sparse.eye(Nz)
-    Hz = create_1d_hamiltonian(Nx * Ny * Nz, 1)
+    Hz = create_1d_hamiltonian(Nx * Ny * Nz, dz)
     H = sparse.kron(Hxy, Iz) + Hz
 
     return H

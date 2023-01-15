@@ -131,11 +131,70 @@ def create_2d_hamiltonian(Nx, dx, Ny = None, dy = None):
     H = sparse.kron(Hx, Iy) + Hy
     return H
 
+
+def sho_eigenenergies(xmin = -10, xmax = 10, Nx = 201, 
+                      ymin = -10, ymax = 10, Ny = 201, 
+                      params = [1, 1], 
+                      neigs = 10, E0 = 0):
+    """
+    This function calculates the quantum simple harmonic oscillator eigenenergies.
+    Theoretically, the eigenenergies are given by: E = hw(n + 2/2), n = nx + ny.
+    However, as we set h = w = 1, and we scale the energies during the Hamiltonian creation
+    by 2, the theoretical eigenenergies are given by: E = 2n + 2.
+
+    Inputs
+    ------
+    xmin: float
+        minimum value of the x axis
+    xmax: float
+        maximum value of the x axis
+    Nx: int
+        number of finite elements in the x axis
+    ymin: float
+        minimum value of the y axis
+    ymax: float
+        maximum value of the y axis
+    Ny: int
+        number of finite elements in the y axis          
+    params: list
+        list containing the parameters of Vfun
+    neigs: int
+        number of eigenvalues to find
+    E0: float
+        eigenenergy value to solve for
+
+    Returns
+    -------
+    evl: list
+        List of eigenenergies.
+    """
+    def Vfun(X, Y, params):
+        Nx = len(X)
+        Ny = len(Y)
+        M = Nx * Ny
+        V = np.zeros(M)
+        vindex = 0
+        for i in range(Nx):
+            for j in range(Ny):
+                V[vindex] = params[0] * X[i]**2 + params[1] * Y[j]**2
+                vindex = vindex + 1
+        return V
+    
+    # Only eigenvalues will be returned!
+    evl = schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun, params, neigs, E0, False)
+    
+    indices = np.argsort(evl)
+    print("Energy eigenvalues:")
+    for i,j in enumerate(evl[indices]):
+        print("{}: {:.2f}".format(i + 1, np.real(j)))
+        
+    return sorted(evl)
+
     
 def eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
-                       Vfun, params, neigs, E0, findpsi):
- 
+                       Vfun, params, 
+                       neigs, E0, findpsi):
     """
     Evaluates and plots the 2 dimensional Schrodinger equation numerically for some potential function Vfun.
     The 2D wavefunctions (actually, the probabilities!) are plotted as a heatmap instead of as an actual plot.
@@ -219,7 +278,6 @@ def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 250,
         If True, the eigen wavefunctions will be calculated and returned.
         If False, only the eigen energies will be found.    
     """
-    
     def Vfun(X, Y, params):
         Nx = len(X)
         Ny = len(Y)
