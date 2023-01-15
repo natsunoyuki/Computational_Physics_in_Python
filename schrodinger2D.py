@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import sparse, linalg
+from scipy import sparse
 from scipy.sparse import linalg as sla
 from mpl_toolkits.mplot3d import Axes3D
  
+
 def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0 = 0.0, findpsi = False):
     """
     Solves the 2 dimensional Schrodinger equation numerically.
@@ -52,13 +53,18 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0 = 0.
 
     V = Vfun2D(x, y, params)
 
+    # The following code might be problematic.
+    '''
     # create the 2D Hamiltonian matrix
-    Hx = create_hamiltonian(Nx, dx)
-    Hy = create_hamiltonian(Ny, dy)
-
+    Hx = create_1d_hamiltonian(Nx, dx)
+    Hy = create_1d_hamiltonian(Ny, dy)
+    
     Ix = sparse.eye(Nx, Nx)
     Iy = sparse.eye(Ny, Ny)
     H = sparse.kron(Hx, Iy) + sparse.kron(Ix, Hy)  
+    '''
+    # Use the following instead of the above!
+    H = create_2d_hamiltonian(Nx, dx, Ny, dy)
 
     # Convert to lil form and add potential energy function
     H = H.tolil()
@@ -74,7 +80,8 @@ def schrodinger2D(xmin, xmax, Nx, ymin, ymax, Ny, Vfun2D, params, neigs, E0 = 0.
     else: 
         return evl, evt, x, y
 
-def create_hamiltonian(Nx, dx):
+
+def create_1d_hamiltonian(Nx, dx):
     """
     Creates a 1 dimensional Hamiltonian.
    
@@ -96,6 +103,34 @@ def create_hamiltonian(Nx, dx):
         H[i + 1, i] = -1
     H = H / (dx ** 2)  
     return H
+
+
+def create_2d_hamiltonian(Nx, dx, Ny = None, dy = None):
+    """
+    Creates a 2D Hamiltonian matrix.
+
+    Inputs
+    ------
+    Nx, Ny: int
+        Number of elements in that axis.
+    dx, dy: float
+        Step size.
+
+    Returns
+    -------
+    H: np.array
+        Hamiltonian matrix.
+    """
+    if Ny is None:
+        Ny = Nx
+    if dy is None:
+        dy = dx
+    Hx = create_1d_hamiltonian(Nx, dx)
+    Iy = sparse.eye(Ny, Ny)
+    Hy = create_1d_hamiltonian(Nx * Ny, dy)
+    H = sparse.kron(Hx, Iy) + Hy
+    return H
+
     
 def eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
@@ -153,6 +188,7 @@ def eval_wavefunctions(xmin, xmax, Nx,
         plt.axis("off")
     plt.show()
 
+
 def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 250,
                            ymin = -10, ymax = 10, Ny = 250,
                            params = [1, 1], neigs = 6, E0 = 0, findpsi = True):
@@ -199,6 +235,7 @@ def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 250,
     eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
                        Vfun, params, neigs, E0, findpsi)
+
 
 def stadium_wavefunctions_plot(R = 1, L = 2, V0 = 1e6, neigs = 6, E0 = 500, Ny = 250):
     """
@@ -252,6 +289,7 @@ def stadium_wavefunctions_plot(R = 1, L = 2, V0 = 1e6, neigs = 6, E0 = 500, Ny =
     eval_wavefunctions(xmin, xmax, Nx,
                        ymin, ymax, Ny,
                        Vfun2D, params, neigs, E0, findpsi=True)
+
 
 def stadium_wavefunctions_3dplot(R = 1, L = 0, V0 = 1e6, neigs = 6, E0 = 70, Ny = 250):
     """
@@ -321,4 +359,4 @@ def stadium_wavefunctions_3dplot(R = 1, L = 0, V0 = 1e6, neigs = 6, E0 = 70, Ny 
         X, Y = np.meshgrid(H[2], H[3])
         ax.plot_surface(X, Y , np.transpose(PSI), cmap = "jet")
         ax.axis("off")
-        plt.show() 
+        plt.show()    

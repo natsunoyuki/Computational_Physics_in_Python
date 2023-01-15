@@ -3,24 +3,25 @@ import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse import linalg as sla
 
+
 def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs = 20, findpsi = False):
     """
-    Solves the 1 dimensional Schrodinger equation numerically
+    Solves the 1 dimensional Schrodinger equation numerically.
     
     Inputs
     ------
     xmin: float
-        minimum value of the x axis
+        Minimum value of the x axis.
     xmax: float
-        maximum value of the x axis
+        Maximum value of the x axis.
     Nx: int
-        number of finite elements in the x axis
+        Number of finite elements in the x axis.
     Vfun: function
-        potential energy function
+        Potential energy function.
     params: list
-        list containing the parameters of Vfun
+        List containing the parameters of Vfun.
     neigs: int
-        number of eigenvalues to find
+        Number of eigenvalues to find. Should be 1 or more.
     findpsi: bool
         If True, the eigen wavefunctions will be calculated and returned.
         If False, only the eigen energies will be found.
@@ -28,18 +29,20 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs = 20, findpsi = False):
     Returns
     -------
     evl: np.array
-        eigenvalues
+        Array of solved eigen-energies.
     evt: np.array
-        eigenvectors
+        Array of solved eigen-wavefunctions.
     x: np.array
-        x axis values
+        Array of corresponding x axis values.
     """
-    # for this code we are using Dirichlet Boundary Conditions
-    x = np.linspace(xmin, xmax, Nx)  # x axis grid
-    dx = x[1] - x[0]  # x axis step size
+    # For this code we are using Dirichlet Boundary Conditions.
+    x = np.linspace(xmin, xmax, Nx)  # x axis grid.
+    dx = x[1] - x[0]  # x axis step size.
+
     # Obtain the potential function values:
     V = Vfun(x, params)
-    # create the Hamiltonian Operator matrix:
+
+    # Create the Hamiltonian matrix:
     H = sparse.eye(Nx, Nx, format = "lil") * 2
     for i in range(Nx - 1):
         #H[i, i] = 2
@@ -47,51 +50,53 @@ def schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs = 20, findpsi = False):
         H[i + 1, i] = -1
     #H[-1, -1] = 2
     H = H / (dx ** 2)
+
     # Add the potential into the Hamiltonian
     for i in range(Nx):
         H[i, i] = H[i, i] + V[i]
     # convert to csc matrix format
     H = H.tocsc()
     
-    # obtain neigs solutions from the sparse matrix
+    # Obtain neigs solutions from the sparse matrix
     [evl, evt] = sla.eigs(H, k = neigs, which = "SM")
 
     for i in range(neigs):
-        # normalize the eigen vectors
+        # Normalize the eigen vectors.
         evt[:, i] = evt[:, i] / np.sqrt(
                                 np.trapz(np.conj(
                                 evt[:, i]) * evt[:, i], x))
-        # eigen values MUST be real:
+        # Eigen values MUST be real:
         evl = np.real(evl)
     if findpsi == False:
         return evl
     else: 
         return evl, evt, x
 
+
 def eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, findpsi = True):
     """
-    Evaluates the wavefunctions given a particular potential energy function Vfun
+    Evaluates the wavefunctions given a particular potential energy function Vfun.
     
     Inputs
     ------
     xmin: float
-        minimum value of the x axis
+        Minimum value of the x axis.
     xmax: float
-        maximum value of the x axis
+        Maximum value of the x axis.
     Nx: int
-        number of finite elements in the x axis
+        Number of finite elements in the x axis.
     Vfun: function
-        potential energy function
+        Potential energy function.
     params: list
-        list containing the parameters of Vfun
+        List containing the parameters of Vfun.
     neigs: int
-        number of eigenvalues to find
+        Number of eigenvalues to find.
     findpsi: bool
         If True, the eigen wavefunctions will be calculated and returned.
         If False, only the eigen energies will be found.
     """
     H = schrodinger1D(xmin, xmax, Nx, Vfun, params, neigs, findpsi)
-    evl = H[0] # energy eigen values
+    evl = H[0] # Energy eigen values.
     indices = np.argsort(evl)
     
     print("Energy eigenvalues:")
@@ -111,6 +116,7 @@ def eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, findpsi = True):
         plt.axis('off')
         i = i + 1  
     plt.show()
+
 
 def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [1]):
     """
@@ -135,6 +141,7 @@ def sho_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params =
     
     eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
     
+
 def infinite_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = 1e10):
     """
     Plots the 1D infinite well wavefunctions.
@@ -159,6 +166,7 @@ def infinite_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20
         return V
     
     eval_wavefunctions(xmin, xmax, Nx, Vfun, params, neigs, True)
+    
     
 def double_well_wavefunctions_plot(xmin = -10, xmax = 10, Nx = 500, neigs = 20, params = [-0.5, 0.01, 7]):
     """
